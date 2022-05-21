@@ -1,12 +1,20 @@
-import dash
+from dash import Dash, Input, Output, callback, dash_table, html, dcc
+import pandas as pd
 import dash_bootstrap_components as dbc
 
-app = dash.Dash(external_stylesheets=[dbc.themes.MORPH])
+df = pd.read_csv('https://git.io/Juf1t')
 
-app.layout = dbc.Container(
-    dbc.Alert("Hello Bootstrap!", color="success"),
-    className="p-5",
-)
+app = Dash(external_stylesheets=[dbc.themes.LUX])
+
+app.layout = dbc.Container([
+    html.H4("Income"),
+    dash_table.DataTable(df.to_dict('records'),[{"name": i, "id": i} for i in df.columns], id='tbl'),
+    dbc.Alert(id='tbl_out'),
+])
+
+@callback(Output('tbl_out', 'children'), Input('tbl', 'active_cell'))
+def update_graphs(active_cell):
+    return str(active_cell) if active_cell else "Click the table"
 
 if __name__ == "__main__":
-    app.run_server()
+    app.run_server(debug=True)
