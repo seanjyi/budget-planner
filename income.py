@@ -1,9 +1,13 @@
-from tkinter import PAGES
 from dash import dcc, html, Input, Output, State, callback, dash_table
 import dash_bootstrap_components as dbc
 import pandas as pd
+from os.path import exists
+from os import rename, remove
 
-df = pd.read_csv('data/income.csv')
+try:
+  df = pd.read_csv('data/income.csv')
+except OSError as e:
+  df = pd.DataFrame(index=range(1), columns=range(5))
 
 input_group = dbc.InputGroup(
   [
@@ -30,7 +34,17 @@ layout = html.Div([
       'lineHeight': '15px'
     },
     data=df.to_dict('records'),
-    columns=[{"name": i, "id": i} for i in df.columns],
+    columns=[{
+      'id': 'date', 'name': 'Date', 'type': 'datetime'
+    }, {
+      'id': 'category', 'name': 'Category', 'type': 'text'
+    }, {
+      'id': 'amount', 'name': 'Amount ($)', 'type': 'numeric'
+    }, {
+      'id': 'mop', 'name': 'MOP', 'type': 'text'
+    }, {
+      'id': 'notes', 'name': 'Notes', 'type': 'text'
+    }],
     editable=True,
     row_deletable=True
   ),
@@ -70,3 +84,22 @@ def add_row(n_clicks, rows, columns):
     rows.append({c['id']: '' for c in columns})
   return rows
 
+# saves file, when pressed
+@callback(
+  Output('save-button', 'n_clicks'),
+  Input('save-button', 'n_clicks')
+)
+def save_file(n_clicks):
+  if n_clicks > 0:
+    if exists('data/income.csv'):
+      i = 1
+      while(i < 6 and exists('data/income-backup-{}.csv'.format(i))):
+        i+= 1
+      for j in range(i,1,-1):
+        if j == 6:
+          remove('data/income-backup-{}.csv'.format(j-1))
+        else:
+          rename('data/income-backup-{}.csv'.format(j-1), 'data/income-backup-{}.csv'.format(j))
+      rename('data/income.csv', 'data/income-backup-1.csv')
+    df.to_csv('data/income.csv', index=False)
+  return n_clicks

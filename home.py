@@ -2,8 +2,8 @@ from dash import Dash, dcc, html, Input, Output, callback
 import dash_bootstrap_components as dbc
 import income, expense
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
-app.config['suppress_callback_exceptions'] = True
+app = Dash(__name__, external_stylesheets=[dbc.themes.LUX], suppress_callback_exceptions=True)
+# app.config['suppress_callback_exceptions'] = True
 server = app.server
 
 INIT_PAGE_SIZE = 15
