@@ -6,11 +6,12 @@ Hello, random person from the world. This project is focused on creating my own 
 
 The following project is built upon dash and dash-bootstrap-components. 
 
+Priority One List
+- sql implementation
+- drop down vs improve reading in csv possibly
+- settings
+- expense 
+- home
 
-DataTable
-> improve header
-> make df remember (i.e. pg size)
-> can save (if income.csv exists make it a backup then save as income.csv)
-> format data table
-> drop down vs improve reading in csv possibly
-
+Priority Two List
+- table width

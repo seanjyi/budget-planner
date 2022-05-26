@@ -1,25 +1,32 @@
 from dash import Dash, dcc, html, Input, Output, callback
 import dash_bootstrap_components as dbc
-import income, expense
+import income, expense, settings
+import time
+INIT_PAGE_SIZE = 15
 
+'''Initalizes dash application, uses LUX theme and supresses callback'''
 app = Dash(__name__, external_stylesheets=[dbc.themes.LUX], suppress_callback_exceptions=True)
 # app.config['suppress_callback_exceptions'] = True
 server = app.server
 
-INIT_PAGE_SIZE = 15
-
+'''Navigation bar layout'''
 navbar = dbc.NavbarSimple(
-  children=[
-    dbc.NavItem(dbc.NavLink("Github", href="https://github.com/seanjyi/budget-planner")),
-    dbc.NavItem(dbc.NavLink("Income", href="/income")),
-    dbc.NavItem(dbc.NavLink("Expense", href="/expense")),
-  ],
+  dbc.Row([
+    dbc.Col(dbc.NavItem(dbc.NavLink("Github", href="https://github.com/seanjyi/budget-planner"))),
+    dbc.Col(dbc.NavItem(dbc.NavLink("Income", href="/income"))),
+    dbc.Col(dbc.NavItem(dbc.NavLink("Expense", href="/expense"))),
+    dbc.Col(dbc.NavItem(dbc.NavLink(html.Img(src='assets/gear.png', height='30px'), href="/settings")))
+    ],
+    align='center'
+  ),
   brand="Finance",
   brand_href="/home",
   color="LightSlateGrey", # color of navBar  
-  dark=True,
+  dark=True
 )
 
+'''Main app layout'''
+app.title = 'Budget Planner'
 app.layout = html.Div([
   navbar,
   dcc.Location(id='url', refresh=False),
@@ -31,7 +38,7 @@ home_layout = html.Div([
   html.H1('HOME: UNDER CONSTRUCTION')
 ])
 
-# Other than income and expense, autocorrects pathname to '/home'
+'''Handles multi-page navigation'''
 @app.callback(
   Output('page-content', 'children'),
   Output('url', 'pathname'),
@@ -42,8 +49,10 @@ def display_page(pathname):
     return income.layout, '/income'
   elif pathname == '/expense':
     return expense.layout, '/expense'
+  elif pathname == '/settings':
+    return settings.layout, '/settings'
   else:
-    return home_layout, '/home'
+    return home_layout, '/home'  
 
 if __name__ == '__main__':
-  app.run_server(debug=True)
+  app.run_server(debug=True) 

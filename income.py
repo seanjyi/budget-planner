@@ -1,13 +1,15 @@
-from dash import dcc, html, Input, Output, State, callback, dash_table
+from dash import html, Input, Output, State, callback, dash_table, dcc
 import dash_bootstrap_components as dbc
 import pandas as pd
 from os.path import exists
 from os import rename, remove
+from dash.dash_table.Format import Format, Scheme, Symbol
 
+'''Reads in data'''
 try:
-  df = pd.read_csv('data/income.csv')
+  income_df = pd.read_csv('data/income.csv')
 except OSError as e:
-  df = pd.DataFrame(index=range(1), columns=range(5))
+  income_df = pd.DataFrame(index=range(1))
 
 input_group = dbc.InputGroup(
   [
@@ -18,6 +20,7 @@ input_group = dbc.InputGroup(
   style={'width': '180px'}
 )
 
+'''Income page layout'''
 layout = html.Div([
   dbc.Row(
     [
@@ -28,22 +31,27 @@ layout = html.Div([
   ),
   dash_table.DataTable(
     id='tbl',
-    style_data={
-      'whiteSpace': 'normal',
-      'height': 'auto',
-      'lineHeight': '15px'
-    },
-    data=df.to_dict('records'),
     columns=[{
       'id': 'date', 'name': 'Date', 'type': 'datetime'
     }, {
       'id': 'category', 'name': 'Category', 'type': 'text'
     }, {
-      'id': 'amount', 'name': 'Amount ($)', 'type': 'numeric'
+      'id': 'amount', 'name': 'Amount ($)', 'type': 'numeric', 'format': Format(precision=2, symbol=Symbol.yes, scheme=Scheme.fixed).group(True)
     }, {
       'id': 'mop', 'name': 'MOP', 'type': 'text'
     }, {
       'id': 'notes', 'name': 'Notes', 'type': 'text'
+    }],
+    style_cell={'text-align': 'center'},
+    style_cell_conditional=[{
+      'if': {'column_id': 'notes'}, 'text-align': 'left'
+    }],
+    style_data={
+      'height': 'auto',
+      'lineHeight': '15px'
+    },
+    style_data_conditional=[{
+      'if': {'column_id': 'notes'}, 'whiteSpace': 'normal'
     }],
     editable=True,
     row_deletable=True
@@ -57,7 +65,7 @@ layout = html.Div([
   )
 ]) 
 
-# when page size button is clicked updates # of rows per page
+'''Updates page size'''
 @callback(
   Output('tbl', 'page_size'),
   Output('page-size', 'data'),
@@ -72,7 +80,11 @@ def update_page_size(n_clicks, value, data):
   else:
     return value, value, value
 
-# when add row button is clicked, add a row
+'''
+Adds additional row when clicked.
+Also, when initally loaded, corrects date formatting
+and sorts by date.
+'''
 @callback(
   Output('tbl', 'data'),
   Input('add-button', 'n_clicks'),
@@ -82,15 +94,24 @@ def update_page_size(n_clicks, value, data):
 def add_row(n_clicks, rows, columns):
   if n_clicks > 0:
     rows.append({c['id']: '' for c in columns})
-  return rows
+    return rows
+  else:
+    global income_df
+    income_df['date'] = pd.to_datetime(income_df['date']).dt.date
+    income_df = income_df.sort_values(by=['date'])
+    return income_df.to_dict('records')
 
-# saves file, when pressed
+'''Save file. If file exists, creates backups'''
 @callback(
   Output('save-button', 'n_clicks'),
-  Input('save-button', 'n_clicks')
+  Input('save-button', 'n_clicks'),
+  State('tbl', 'data')
 )
-def save_file(n_clicks):
+def save_file(n_clicks, data):
   if n_clicks > 0:
+    global income_df
+    income_df = pd.DataFrame(data)
+
     if exists('data/income.csv'):
       i = 1
       while(i < 6 and exists('data/income-backup-{}.csv'.format(i))):
@@ -101,5 +122,5 @@ def save_file(n_clicks):
         else:
           rename('data/income-backup-{}.csv'.format(j-1), 'data/income-backup-{}.csv'.format(j))
       rename('data/income.csv', 'data/income-backup-1.csv')
-    df.to_csv('data/income.csv', index=False)
+    income_df.to_csv('data/income.csv', index=False)
   return n_clicks
