@@ -6,6 +6,10 @@ Hello, random person from the world. This project is focused on creating my own 
 
 The following project is built upon dash and dash-bootstrap-components. 
 
+To add a gif for the loading screen, simply add a gif to the assets foulder named 'loading.gif'
+
+Library versions this was built on:
+
 Priority One List
 - sql implementation
 - drop down vs improve reading in csv possibly
