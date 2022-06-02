@@ -1,3 +1,9 @@
+'''
+Handles user input related to income. Shows a data table
+that the user can edit or add to. Additionally, can save the 
+data table or change page size.
+'''
+
 from dash import html, Input, Output, State, callback, dash_table, dcc
 import dash_bootstrap_components as dbc
 import pandas as pd
@@ -9,7 +15,7 @@ from dash.dash_table.Format import Format, Scheme, Symbol
 try:
   income_df = pd.read_csv('data/income.csv')
 except OSError as e:
-  income_df = pd.DataFrame(index=range(1))
+  income_df = pd.DataFrame(data=range(5))
 
 input_group = dbc.InputGroup(
   [
@@ -91,17 +97,22 @@ and sorts by date.
   State('tbl', 'data'),
   State('tbl', 'columns')
 )
-def add_row(n_clicks, rows, columns):
+def add_row(n_clicks, data, columns):
+  global income_df
   if n_clicks > 0:
-    rows.append({c['id']: '' for c in columns})
-    return rows
-  else:
-    global income_df
+    data.append({c['id']: '' for c in columns})
+    return data
+  elif 'date' in income_df:
     income_df['date'] = pd.to_datetime(income_df['date']).dt.date
     income_df = income_df.sort_values(by=['date'])
     return income_df.to_dict('records')
+  else:
+    return income_df.to_dict('records')
 
-'''Save file. If file exists, creates backups'''
+'''
+Save file. If file exists, creates backups
+Additionally, updates the dataframe when saved.
+'''
 @callback(
   Output('save-button', 'n_clicks'),
   Input('save-button', 'n_clicks'),

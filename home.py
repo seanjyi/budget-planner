@@ -1,8 +1,14 @@
+'''
+main file for the program. Creates the application frame,
+and also handles multiple page navigation.
+'''
+
 from dash import Dash, dcc, html, Input, Output, callback
 import dash_bootstrap_components as dbc
 import income, expense, settings
 import time
-INIT_PAGE_SIZE = 15
+
+INIT_PAGE_SIZE = 10
 
 '''Initalizes dash application, uses LUX theme and supresses callback'''
 app = Dash(__name__, external_stylesheets=[dbc.themes.LUX], suppress_callback_exceptions=True)
@@ -30,7 +36,7 @@ app.title = 'Budget Planner'
 app.layout = html.Div([
   navbar,
   dcc.Location(id='url', refresh=False),
-  dcc.Store(id='page-size', data=INIT_PAGE_SIZE),
+  dcc.Store(id='page-size', data=INIT_PAGE_SIZE), # remembers init_page during user session
   html.Div(id='page-content')
 ])
 
