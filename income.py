@@ -26,8 +26,8 @@ input_group = dbc.InputGroup(
   style={'width': '180px'}
 )
 
-'''Income page layout'''
-layout = html.Div([
+'''Income data table page layout'''
+table_layout = html.Div([
   dbc.Row(
     [
       dbc.Col(html.H1('Income', style={'text-align': 'center'})),
@@ -135,3 +135,38 @@ def save_file(n_clicks, data):
       rename('data/income.csv', 'data/income-backup-1.csv')
     income_df.to_csv('data/income.csv', index=False)
   return n_clicks
+
+'''Income first user layout'''
+new_layout = html.Div([
+  dcc.Upload(
+    id='upload-data',
+        children=html.Div([
+            'Drag and Drop or ',
+            html.A('Select CSV')
+        ]),
+        style={
+            'width': '400px', 'height': '60px', 'lineHeight': '60px',
+            'borderWidth': '1px', 'borderStyle': 'dashed',
+            'borderRadius': '50px', 'textAlign': 'center'
+        }
+  ),
+  html.Plaintext(
+    "or"
+  ),
+  dbc.Button(
+    id='income-new',
+    children='New Data',
+    n_clicks=0,
+    color='info',
+    style={
+      'borderRadius': '50px'
+    }
+  )
+],
+style={
+  'display': 'flex', 'flex-direction': 'column', 'align-items': 'center',
+  'position': 'absolute', 'top': '50%', 'left': '50%',
+  'transform': 'translate(-50%, -50%)'
+})
+
+layout = new_layout

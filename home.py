@@ -1,5 +1,5 @@
 '''
-main file for the program. Creates the application frame,
+Main file for the program. Creates the application frame,
 and also handles multiple page navigation.
 '''
 
@@ -45,7 +45,7 @@ home_layout = html.Div([
 ])
 
 '''Handles multi-page navigation'''
-@app.callback(
+@callback(
   Output('page-content', 'children'),
   Output('url', 'pathname'),
   Input('url', 'pathname')

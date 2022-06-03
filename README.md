@@ -19,9 +19,11 @@ The following project is built upon dash and dash-bootstrap-components ~~with ra
 ## How To Use
 
 Run
-```
+
+```python
 python home.py
 ```
+
 To add a gif for the loading screen, simply add a gif to the assets foulder named 'loading.gif'
 
 ### Income
