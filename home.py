@@ -6,7 +6,7 @@ and also handles multiple page navigation.
 from dash import Dash, dcc, html, Input, Output, callback
 import dash_bootstrap_components as dbc
 import income, expense, settings
-import time
+from layouts import home_layout, settings_layout, expense_layout
 
 INIT_PAGE_SIZE = 10
 
@@ -40,10 +40,6 @@ app.layout = html.Div([
   html.Div(id='page-content')
 ])
 
-home_layout = html.Div([
-  html.H1('HOME: UNDER CONSTRUCTION')
-])
-
 '''Handles multi-page navigation'''
 @callback(
   Output('page-content', 'children'),
@@ -54,9 +50,9 @@ def display_page(pathname):
   if pathname == '/income':
     return income.layout, '/income'
   elif pathname == '/expense':
-    return expense.layout, '/expense'
+    return expense_layout, '/expense'
   elif pathname == '/settings':
-    return settings.layout, '/settings'
+    return settings_layout, '/settings'
   else:
     return home_layout, '/home'  
 
