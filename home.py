@@ -37,6 +37,7 @@ app.layout = html.Div([
   navbar,
   dcc.Location(id='url', refresh=False),
   dcc.Store(id='page-size', data=INIT_PAGE_SIZE), # remembers init_page during user session
+  dcc.Store(id='income-tbl-data'), # remmeber dcc store bug
   html.Div(id='page-content')
 ])
 

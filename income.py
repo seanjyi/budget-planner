@@ -10,6 +10,11 @@ from os.path import exists
 from os import rename, remove
 from settings import connection
 from contextlib import closing
+from base64 import b64decode
+from io import StringIO
+
+'''Global variable to show different pages'''
+show_new = True # true to show income_new
 
 '''Initial load, checks if there is new data'''
 with closing(connection.cursor()) as c:
@@ -21,8 +26,10 @@ with closing(connection.cursor()) as c:
       mop NOT NULL,
       notes
     );""")
+    connection.commit()
+    show_new=True
   else:
-    print('hi')
+    show_new=False
     # load table info
 
 # income table update logic
@@ -30,10 +37,11 @@ with closing(connection.cursor()) as c:
   Output('income-new', 'hidden'),
   Output('income-data', 'hidden'),
   Output('income-tbl', 'data'),
+  Output('income-error', 'is_open'),
   Input('income-upload', 'contents'),
   Input('income-empty', 'n_clicks'),
-  State('income-add', 'n_clicks'),
-  State('income-tbl', 'data'),
+  Input('income-add', 'n_clicks'),
+  State('income-tbl-data', 'data'),
   State('income-tbl', 'columns')
 )
 def data_update(upload, empty, add, data, col):
@@ -45,17 +53,37 @@ def data_update(upload, empty, add, data, col):
   elif trigger_id == 'income-add' and add != 0:
     return add_row(data, col)
   else: 
-    return no_update, no_update, no_update
+    return not show_new, show_new, data, no_update
+
+'''Keeps track of table data'''
+@callback(
+  Output('income-tbl-data', 'data'),
+  Input('income-tbl', 'data')
+)
+def data_tracker(data):
+  return data
 
 # INCOME_NEW CALLBACKS
 
 '''Selected file to load'''
-def load_data(contents):
-  return True, False, pd.read_csv('data/income.csv').to_dict('records')
+def load_data(upload):
+  try:
+    upload_type, upload_string = upload.split(',')
+    if upload_type != 'data:application/vnd.ms-excel;base64':
+      raise Exception()
+    
+    global show_new
+    show_new=False
+    df = pd.read_csv(StringIO(b64decode(upload_string).decode('utf-8')))
+    return not show_new, show_new, df.to_dict('records'), no_update
+  except Exception as e:
+    return no_update, no_update, no_update, True
 
 '''Selected new data'''
 def init_data():
-  return True, False, pd.DataFrame(data=range(5)).to_dict('records')
+  global show_new
+  show_new=False
+  return not show_new, show_new, pd.DataFrame(data=range(5)).to_dict('records'), no_update
 
 # INCOME_DATA CALLBACKS
 
@@ -81,7 +109,7 @@ and sorts by date.
 '''
 def add_row(data, columns):
   data.append({c['id']: '' for c in columns})
-  return True, True, data.to_dict('records')
+  return no_update, no_update, data, no_update
 
 '''
 Save file. If file exists, creates backups
