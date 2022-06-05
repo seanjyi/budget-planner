@@ -21,12 +21,12 @@ income_new = html.Div([
   dbc.Alert('File type must be CSV', id='income-error', color='danger', is_open=False),
   dcc.Upload(
     id='income-upload',
-        children=html.Div(['Drag and Drop or Select CSV']),
-        style={
-            'width': '400px', 'height': '60px', 'lineHeight': '60px',
-            'borderWidth': '1px', 'borderStyle': 'dashed',
-            'borderRadius': '50px', 'textAlign': 'center'
-        }
+    children=html.Div(['Drag and Drop or Select CSV']),
+    style={
+      'width': '400px', 'height': '60px', 'lineHeight': '60px',
+      'borderWidth': '1px', 'borderStyle': 'dashed',
+      'borderRadius': '50px', 'textAlign': 'center'
+    }
   ),
   html.Plaintext(
     "or"
