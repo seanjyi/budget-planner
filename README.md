@@ -15,6 +15,7 @@ The following project is built upon dash and dash-bootstrap-components ~~with ra
 | dash-bootstrap-components | 1.1.0     |
 | dash-core-components      | 2.0.0     |
 | pandas                    | 1.4.2     |
+| sqlite3                   | 3.38.3    |
 
 ## How To Use
 
@@ -26,26 +27,18 @@ python home.py
 
 To add a gif for the loading screen, simply add a gif to the assets foulder named 'loading.gif'
 
-### Income
-
-To use prexisiting data:
-
-- save data as 'data/income.csv'
-- IT IS ~~FUCKING~~ IMPORTANT TO HAVE THE FOLLOWING CSV HEADERS
-
->date,category,amount,mop,notes
-
-When saving, the current income.csv will be saved to a backup file until they are 5. Then it will delete the oldest one.
-
-Additionally, when manipulating data and switching pages, it will not save. This is so when creating a mistake, one can easily revisit the page to undo it.
-
 ## Pending updates
 
 ### Priority One List
 
 1. sql implementation
-1. drop down vs improve reading in csv possibly
+    1. fix bugs leading from new data, or csv file
+    1. load data from pre-existing data table
+    1. add sql save function
 1. settings
+    1. page size
+    1. drop down
+    1. data deletion
 1. expense
 1. home
 

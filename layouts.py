@@ -7,14 +7,19 @@ from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
 from dash.dash_table.Format import Format, Scheme, Symbol
 
+# HOME PAGE 
+
+'''home page layout'''
 home_layout = html.Div([
   html.H1('HOME: UNDER CONSTRUCTION')
 ])
 
-'''Income first user layout'''
-new_layout = html.Div([
+# INCOME PAGE
+
+'''no income database table layout'''
+income_new = html.Div([
   dcc.Upload(
-    id='upload-data',
+    id='income-upload',
         children=html.Div([
             'Drag and Drop or ',
             html.A('Select CSV')
@@ -29,7 +34,7 @@ new_layout = html.Div([
     "or"
   ),
   dbc.Button(
-    id='income-new',
+    id='income-empty',
     children='New Data',
     n_clicks=0,
     color='info',
@@ -38,23 +43,27 @@ new_layout = html.Div([
     }
   )
 ],
+# positions upload and new data button to middle of screen
 style={
   'display': 'flex', 'flex-direction': 'column', 'align-items': 'center',
   'position': 'absolute', 'top': '50%', 'left': '50%',
   'transform': 'translate(-50%, -50%)'
-})
+},
+id='income-new'
+)
 
 input_group = dbc.InputGroup(
   [
-    dbc.Input(id='size-input', type='number'),
-    dbc.Button(id='page-button', n_clicks=0, children='Page Size'),
+    dbc.Input(id='income-size', type='number'),
+    dbc.Button(id='income-page', n_clicks=0, children='Page Size'),
   ],
   size='sm',
   style={'width': '180px'}
 )
 
-'''Income data table page layout'''
-income_layout = html.Div([
+'''income database table layout'''
+income_data = html.Div([
+  # title and page size control
   dbc.Row(
     [
       dbc.Col(html.H1('Income', style={'text-align': 'center'})),
@@ -63,7 +72,7 @@ income_layout = html.Div([
     ]
   ),
   dash_table.DataTable(
-    id='tbl',
+    id='income-tbl',
     columns=[{
       'id': 'date', 'name': 'Date', 'type': 'datetime'
     }, {
@@ -89,18 +98,28 @@ income_layout = html.Div([
     editable=True,
     row_deletable=True
   ),
+  # positions add and save button
   dbc.Row(
     [
-      dbc.Col(dbc.Button(id='add-button', n_clicks=0, children='Add Row', color='primary'), width='auto'),
-      dbc.Col(dbc.Button(id='save-button', n_clicks=0, children='Save', color='info'), width='auto'),
+      dbc.Col(dbc.Button(id='income-add', n_clicks=0, children='Add Row', color='primary'), width='auto'),
+      dbc.Col(dbc.Button(id='income-save', n_clicks=0, children='Save', color='info'), width='auto'),
     ],
     justify='evenly'
-  )
-]) 
+  )],
+  hidden=True,
+  id='income-data'
+) 
+
+'''income page layout'''
+income_layout = html.Div([income_new, income_data])
+
+# EXPENSE PAGE
 
 expense_layout = html.Div([
     html.H3('Warning: Construction Zone')
 ])
+
+# SETTINGS PAGE
 
 settings_layout = html.Div([
     html.H3('Warning: Construction Zone')
