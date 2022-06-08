@@ -31,9 +31,6 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 
 ### Priority One List
 
-1. sql implementation
-    1. add sql save function
-    1. get to load data table info in
 1. settings
     1. page size
     1. drop down
