@@ -10,11 +10,6 @@ from layouts import home_layout, settings_layout, expense_layout, income_layout
 
 INIT_PAGE_SIZE = 10
 
-'''Initalizes dash application, uses LUX theme and supresses callback'''
-app = Dash(__name__, external_stylesheets=[dbc.themes.LUX], suppress_callback_exceptions=True)
-# app.config['suppress_callback_exceptions'] = True
-server = app.server
-
 '''Navigation bar layout'''
 navbar = dbc.NavbarSimple(
   dbc.Row([
@@ -32,12 +27,11 @@ navbar = dbc.NavbarSimple(
 )
 
 '''Main app layout'''
-app.title = 'Budget Planner'
-app.layout = html.Div([
+app_layout = html.Div([
   navbar,
   dcc.Location(id='url', refresh=False),
   dcc.Store(id='page-size', data=INIT_PAGE_SIZE), # remembers init_page during user session
-  dcc.Store(id='income-tbl-data'), # remmeber dcc store bug
+  dcc.Store(id='income-tbl-data', storage_type='memory'), # remmeber dcc store bug
   html.Div(id='page-content')
 ])
 
@@ -57,5 +51,14 @@ def display_page(pathname):
   else:
     return home_layout, '/home'  
 
+'''Initalizes dash application, uses LUX theme and supresses callback'''
 if __name__ == '__main__':
-  app.run_server(debug=True) 
+  app=Dash(__name__, external_stylesheets=[dbc.themes.LUX], suppress_callback_exceptions=True)
+
+  app.title='Budget Planner'
+  app.layout=app_layout
+
+  income.income_init()
+
+  app.run_server(debug=True, use_reloader=False) # reloader = false for debugging
+  

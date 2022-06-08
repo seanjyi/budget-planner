@@ -38,6 +38,10 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
     1. page size
     1. drop down
     1. data deletion
+1. front end visualization update
+    1. button color
+    1. button border
+    1. css clean up (rewrite by hierarchy)
 1. expense
 1. home
 

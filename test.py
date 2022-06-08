@@ -32,16 +32,7 @@ with conn:
     mop NOT NULL,
     notes
   );""")
-  cur.execute('''INSERT INTO income VALUES ( 'h', 'fjdsklf', 'sdfs', 'sdfsdf', NULL)''')
-  cur.execute('''SELECT * FROM income ''')
   print(cur.fetchall())
-
-  info = cur.execute("PRAGMA table_info('income')").fetchall()
-  columns = [item[0] for item in cur.description]
-
-  df = pd.DataFrame(info, columns=columns)
-
-  print(df)
 
 # terminate the connection
 conn.close()

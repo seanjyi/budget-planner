@@ -8,31 +8,36 @@ from dash import Input, Output, State, callback, ctx, no_update
 import pandas as pd
 from os.path import exists
 from os import rename, remove
-from settings import connection
 from contextlib import closing
 from base64 import b64decode
 from io import StringIO
+from settings import DBLOC
+import sqlite3
 
 '''Global variable to show different pages'''
 show_new = True # true to show income_new
 
 '''Initial load, checks if there is new data'''
-with closing(connection.cursor()) as c:
-  if c.execute('''SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='income')''').fetchone()[0] == 0:
-    c.execute("""CREATE TABLE income (
-      date INTEGER NOT NULL,
-      category NOT NULL,
-      amount MONEY NOT NULL,
-      mop NOT NULL,
-      notes
-    );""")
-    connection.commit()
-    show_new=True
-  else:
-    show_new=False
-    # load table info
+def income_init():
+  print('new income page load')
+  global show_new
+  with closing(sqlite3.connect(DBLOC)) as connection:
+    with closing(connection.cursor()) as c:
+      if c.execute('''SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='income')''').fetchone()[0] == 0:
+        c.execute("""CREATE TABLE income (
+          date INTEGER NOT NULL,
+          category NOT NULL,
+          amount MONEY NOT NULL,
+          mop NOT NULL,
+          notes
+        );""")
+        show_new=True
+      else:
+        df = pd.read_sql_query('SELECT * FROM income', connection)
+        show_new=False
+               
 
-# income table update logic
+''' Income table update logic '''
 @callback(
   Output('income-new', 'hidden'),
   Output('income-data', 'hidden'),
@@ -116,24 +121,16 @@ Save file. If file exists, creates backups
 Additionally, updates the dataframe when saved.
 '''
 @callback(
-  Output('income-save', 'n_clicks'),
+  Output('income-saved', 'is_open'),
   Input('income-save', 'n_clicks'),
   State('income-tbl', 'data')
 )
 def save_file(n_clicks, data):
   if n_clicks > 0:
-    global income_df
-    income_df = pd.DataFrame(data)
+    with closing(sqlite3.connect(DBLOC)) as connection:
+      pd.DataFrame(data).to_sql('income', con=connection, if_exists='replace', index=False)    
+      
+      # print(pd.read_sql_query('SELECT * FROM income', connection))
 
-    if exists('data/income.csv'):
-      i = 1
-      while(i < 6 and exists('data/income-backup-{}.csv'.format(i))):
-        i+= 1
-      for j in range(i,1,-1):
-        if j == 6:
-          remove('data/income-backup-{}.csv'.format(j-1))
-        else:
-          rename('data/income-backup-{}.csv'.format(j-1), 'data/income-backup-{}.csv'.format(j))
-      rename('data/income.csv', 'data/income-backup-1.csv')
-    income_df.to_csv('data/income.csv', index=False)
-  return n_clicks
+    return True
+  return no_update

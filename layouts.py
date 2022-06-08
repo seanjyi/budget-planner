@@ -25,7 +25,7 @@ income_new = html.Div([
     style={
       'width': '400px', 'height': '60px', 'lineHeight': '60px',
       'borderWidth': '1px', 'borderStyle': 'dashed',
-      'borderRadius': '50px', 'textAlign': 'center'
+      'borderRadius': '60px', 'textAlign': 'center'
     }
   ),
   html.Plaintext(
@@ -104,6 +104,10 @@ income_data = html.Div([
       dbc.Col(dbc.Button(id='income-save', n_clicks=0, children='Save', color='info'), width='auto'),
     ],
     justify='evenly'
+  ),
+  dbc.Row(dbc.Alert(id='income-saved', children='✓: Data Saved', color='#2FDD92', fade=False, is_open=False, duration=1000,
+    style={'color': 'white', 'text-align': 'center', 'line-height': '4px'}),
+    style={'width': '250px', 'margin-left': 'auto', 'margin-right': 'auto'}
   )],
   hidden=True,
   id='income-data'
