@@ -42,7 +42,7 @@ def income_init():
   Output('income-new', 'hidden'),
   Output('income-data', 'hidden'),
   Output('income-tbl', 'data'),
-  Output('income-error', 'is_open'),
+  Output('income-error', 'hidden'),
   Input('income-upload', 'contents'),
   Input('income-empty', 'n_clicks'),
   Input('income-add', 'n_clicks'),
@@ -86,7 +86,7 @@ def load_data(upload):
     df = pd.read_csv(StringIO(b64decode(upload_string).decode('utf-8')))
     return not show_new, show_new, df.to_dict('records'), no_update
   except Exception:
-    return no_update, no_update, no_update, True
+    return no_update, no_update, no_update, False
 
 '''Selected new data'''
 def init_data():

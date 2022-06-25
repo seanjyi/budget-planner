@@ -18,14 +18,14 @@ home_layout = html.Div([
 
 '''no income database table layout'''
 income_new = html.Div([
-  dbc.Alert('File type must be CSV', id='income-error', color='danger', is_open=False),
+  html.Div('Selected file type must be CSV', id='income-error', hidden=True, style={'color': '#D62828'}),
   dcc.Upload(
     id='income-upload',
     children=html.Div(['Drag and Drop or Select CSV']),
     style={
       'width': '400px', 'height': '60px', 'lineHeight': '60px',
       'borderWidth': '1px', 'borderStyle': 'dashed',
-      'borderRadius': '60px', 'textAlign': 'center'
+      'borderRadius': '25px', 'textAlign': 'center'
     }
   ),
   html.Plaintext(
@@ -37,7 +37,7 @@ income_new = html.Div([
     n_clicks=0,
     color='info',
     style={
-      'borderRadius': '50px'
+      'borderRadius': '25px'
     }
   )
 ],

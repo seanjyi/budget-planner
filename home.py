@@ -31,7 +31,7 @@ app_layout = html.Div([
   navbar,
   dcc.Location(id='url', refresh=False),
   dcc.Store(id='page-size', data=INIT_PAGE_SIZE),  # remembers init_page during user session
-  dcc.Store(id='income-tbl-data', storage_type='memory'),  # remmeber dcc store bug
+  dcc.Store(id='income-tbl-data', storage_type='session'),  # remmeber dcc store bug
   html.Div(id='page-content')
 ])
 
@@ -60,4 +60,4 @@ if __name__ == '__main__':
 
   income.income_init()
 
-  app.run_server(debug=True, use_reloader=False)  # reloader = false for debugging
+  app.run_server(debug=True, use_reloader=False)  # disabled hot fix
