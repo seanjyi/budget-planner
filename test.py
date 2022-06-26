@@ -1,38 +1,63 @@
-# import required module
-import sqlite3
-import pandas as pd
+import dash
+import dash_bootstrap_components as dbc
+import dash_core_components as dcc
+import dash_html_components as html
+from dash.dependencies import Input, Output
 
-# connect to database
-conn = sqlite3.connect(':memory:')
- 
-# create cursor object
-cur = conn.cursor()
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-with conn:
-  # create tables
-  cur.execute("""CREATE TABLE income (
-    date INTEGER NOT NULL,
-    category NOT NULL,
-    amount MONEY NOT NULL,
-    mop NOT NULL,
-    notes
-  );""")
-  print('inocme table created')
- 
-  # # check if table exists
-  # print('Check if INCOME table exists in the database:')
-  # listOfTables = cur.execute(
-  #   """SELECT name FROM sqlite_master WHERE type='table' AND name='INCOME'; """).fetchall()
-  
-  # print(listOfTables)
-  cur.execute("""CREATE TABLE income (
-    date INTEGER NOT NULL,
-    category NOT NULL,
-    amount MONEY NOT NULL,
-    mop NOT NULL,
-    notes
-  );""")
-  print(cur.fetchall())
+# the style arguments for the sidebar. We use position:fixed and a fixed width
+SIDEBAR_STYLE = {
+    "position": "fixed",
+    "top": 0,
+    "left": 0,
+    "bottom": 0,
+    "width": "16rem",
+    "padding": "2rem 1rem",
+    "background-color": "#f8f9fa",
+}
 
-# terminate the connection
-conn.close()
+# the styles for the main content position it to the right of the sidebar and
+# add some padding.
+CONTENT_STYLE = {
+    "margin-left": "18rem",
+    "margin-right": "2rem",
+    "padding": "2rem 1rem",
+}
+
+sidebar = html.Div(
+    [
+        html.H2("Sidebar", className="display-4"),
+        html.Hr(),
+        html.P(
+            "A simple sidebar layout with navigation links for same page", className="lead"
+        ),
+        dbc.Nav(
+            [
+                dbc.NavLink("Home", href="#start", external_link=True),
+                dbc.NavLink("Mid", href="#mid",external_link=True),
+                dbc.NavLink("End", href="#end",external_link=True),
+            ],
+            vertical=True,
+            pills=True,
+        ),
+    ],
+    style=SIDEBAR_STYLE,
+)
+
+content = html.Div(
+            html.Div([html.P("Hello World", id="start")] +
+                                  [html.Br()]*50 +
+                                  [html.P("Middle World", id="mid")] +
+                                  [html.Br()]*50 +
+                                  [html.P("Goodbye world", id="end")]
+                                 ),
+    id="page-content", style=CONTENT_STYLE)
+
+
+app.layout = html.Div([sidebar, content])
+
+
+
+if __name__ == '__main__':
+    app.run_server(debug=True, port=8022,use_reloader=False, host='127.0.0.1')

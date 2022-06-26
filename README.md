@@ -32,14 +32,13 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 ### Priority One List
 
 1. front end visualization update
-    1. circular buttons
-    1. update error msg, needs space
-    1. update button color
-    1. css code clean up
-    1. settings layout
-        1. default page size:
-        1. list of things
+    1. update error msg
+    1. code clean up
+    1. page button decision
 1. settings
+    1. settings layout
+        1. default page size
+        1. list of things
     1. page size
     1. drop down
     1. data deletion
