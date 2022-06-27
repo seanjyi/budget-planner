@@ -6,11 +6,14 @@ data table or change page size.
 
 import sqlite3
 import pandas as pd
+import dash_bootstrap_components as dbc
 from dash import Input, Output, State, callback, ctx, no_update
 from contextlib import closing
 from base64 import b64decode
 from io import StringIO
+from time import sleep
 from settings import DBLOC
+from layouts import INCOME_SAVE
 
 '''Global variable to show different pages'''
 income_df = pd.DataFrame(data=range(5))
@@ -125,16 +128,29 @@ Save file. If file exists, creates backups
 Additionally, updates the dataframe when saved.
 '''
 @callback(
-  Output('income-saved', 'is_open'),
+  Output('income-save', 'children'),
+  Output('income-save', 'style'),
+  Output('income-button', 'key'),
   Input('income-save', 'n_clicks'),
-  State('income-tbl', 'data')
+  State('income-tbl', 'data'),
+  prevent_initial_call=True
 )
 def save_file(n_clicks, data):
-  if n_clicks > 0:
-    with closing(sqlite3.connect(DBLOC)) as connection:
-      pd.DataFrame(data).to_sql('income', con=connection, if_exists='replace', index=False)
+  with closing(sqlite3.connect(DBLOC)) as connection:
+    pd.DataFrame(data).to_sql('income', con=connection, if_exists='replace', index=False)
 
-      # print(pd.read_sql_query('SELECT * FROM income', connection))
+    # print(pd.read_sql_query('SELECT * FROM income', connection))
+  return 'Saved!', {'borderRadius': '25px', 'width':'100px', 'background-color': '#2FDD92'}, 'load_trigger'
 
-    return True
-  return no_update
+'''
+Loading time for save button. Visual 
+to show that save completed.
+'''
+@callback(
+  Output('income-button', 'children'),
+  Input('income-button', 'key'),
+  prevent_initial_call=True
+)
+def save_load(key):
+  sleep(2)
+  return INCOME_SAVE

@@ -9,6 +9,8 @@ from dash.dash_table.Format import Format, Scheme, Symbol
 
 # Order of parameters: id > children > style > etc
 
+INCOME_SAVE = dbc.Button(id='income-save', n_clicks=0, children='Save', color='info', style={'borderRadius': '25px', 'width':'100px'})
+
 # HOME PAGE 
 
 '''home page layout'''
@@ -55,10 +57,10 @@ income_new = html.Div(
 
 input_group = dbc.InputGroup(
   children=[
-    dbc.Input(id='income-size', type='number'),
-    dbc.Button(id='income-page', children='Page Size', n_clicks=0),
+    dbc.Input(id='income-size', style={'border-radius': '25px 0 0 25px'}, type='number'),
+    dbc.Button(id='income-page', children='Page Size', style={'border-radius': '0 25px 25px 0', 'background-color': 'LightSlateGrey'}, n_clicks=0),
   ],
-  style={'width': '180px'},
+  style={'width': '180px', 'margin-right': '10px'},
   size='sm'
 )
 
@@ -67,11 +69,14 @@ income_data = html.Div(
   id='income-data',
   children=[
     # title and page size control
-    dbc.Row([
-      dbc.Col(html.H1('Income', style={'text-align': 'center'})),
-      dbc.Col(),
-      dbc.Col(input_group, align='end', width='auto'),    
-    ]),
+    dbc.Row(
+      children=[
+        dbc.Col(html.H1('Income', style={'text-align': 'center'})),
+        dbc.Col(),
+        dbc.Col(input_group, align='end', width='auto'),    
+      ],
+      style={'margin-top': '10px'}
+    ),
     dash_table.DataTable(
       id='income-tbl',
       columns=[
@@ -99,22 +104,10 @@ income_data = html.Div(
     dbc.Row(
       [
         dbc.Col(dbc.Button(id='income-add', n_clicks=0, children='Add Row', style={'borderRadius': '25px', 'background-color': 'LightSlateGrey'}), width='auto'),
-        dbc.Col(dbc.Button(id='income-save', n_clicks=0, children='Save', color='info', style={'borderRadius': '25px'}), width='auto'),
+        dbc.Col(id='income-button', children=INCOME_SAVE, width='auto'),
       ],
       style={'margin-top': '50px'},
       justify='evenly'
-    ),
-    dbc.Row(
-      dbc.Alert(
-        id='income-saved', 
-        children='Data Saved', 
-        style={'color': '#FFFFFF', 'text-align': 'center', 'line-height': '4px', 'borderRadius': '25px'},
-        color='#2FDD92', # green color: #2FDD92
-        fade=False, 
-        is_open=False, 
-        duration=1000
-      ),
-      style={'width': '250px', 'margin-left': 'auto', 'margin-right': 'auto'}
     ),
   ],
   hidden=True

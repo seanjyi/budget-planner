@@ -33,17 +33,17 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 
 1. front end visualization update
     1. update error msg
-    1. code clean up
     1. page button decision
+    1. code clean up and commenting
 1. settings
-    1. settings layout
+    1. settings layout [by 7/1]
         1. default page size
         1. list of things
     1. page size
     1. drop down
-    1. data deletion
-1. expense
-1. home
+    1. data deletion  [by 7/8]
+1. expense 
+1. home [start by 7/14]
 
 ### Priority Two List
 
