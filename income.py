@@ -13,7 +13,7 @@ from base64 import b64decode
 from io import StringIO
 from time import sleep
 from settings import DBLOC
-from layouts import INCOME_SAVE
+from layouts import INCOME_SAVE, CONFIRM_COL
 
 '''Global variable to show different pages'''
 income_df = pd.DataFrame(data=range(5))

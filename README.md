@@ -31,20 +31,18 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 
 ### Priority One List
 
-1. front end visualization update
-    1. update error msg
-    1. page button decision
-    1. code clean up and commenting
 1. settings
     1. settings layout [by 7/1]
-        1. default page size
-        1. list of things
-    1. page size
-    1. drop down
-    1. data deletion  [by 7/8]
-1. expense 
+        1. simple inputs
+        1. ??? fix store bug
+        1. button maker
+        1. export button
+        1. delete confirm button
+        1. jump w/ jump logic
+    1. page size logic with sql
+    1. add/delete to data table logic
+    1. sql logic
+    1. drop down and repayment columns on income
+    1. data deletion and export  [by 7/8]
+1. expense
 1. home [start by 7/14]
-
-### Priority Two List
-
-1. table width

@@ -11,6 +11,10 @@ from dash.dash_table.Format import Format, Scheme, Symbol
 
 INCOME_SAVE = dbc.Button(id='income-save', n_clicks=0, children='Save', color='info', style={'borderRadius': '25px', 'width':'100px'})
 
+MAIN_COL = 'LightSlateGrey'
+ERROR_COL = '#D62828'
+CONFIRM_COL = '#2FDD92'
+
 # HOME PAGE 
 
 '''home page layout'''
@@ -25,7 +29,7 @@ income_new = html.Div(
     html.Div(
       id='income-error', 
       children='Selected file type must be CSV',
-      style={'color': '#D62828'},
+      style={'color': ERROR_COL},
       hidden=True
     ),
     dcc.Upload(
@@ -57,10 +61,10 @@ income_new = html.Div(
 
 input_group = dbc.InputGroup(
   children=[
-    dbc.Input(id='income-size', style={'border-radius': '25px 0 0 25px'}, type='number'),
-    dbc.Button(id='income-page', children='Page Size', style={'border-radius': '0 25px 25px 0', 'background-color': 'LightSlateGrey'}, n_clicks=0),
+    dbc.Input(id='income-size', style={'border-radius': '25px 0 0 25px'}, type='number', min=1, persistence=True, persistence_type='session'),
+    dbc.Button(id='income-page', children='Page Size', style={'border-radius': '0 25px 25px 0', 'background-color': MAIN_COL}, n_clicks=0),
   ],
-  style={'width': '180px', 'margin-right': '10px'},
+  style={'width': '180px', 'margin-right': '10px', 'margin-bottom': '10px'},
   size='sm'
 )
 
@@ -103,7 +107,7 @@ income_data = html.Div(
     # positions add and save button
     dbc.Row(
       [
-        dbc.Col(dbc.Button(id='income-add', n_clicks=0, children='Add Row', style={'borderRadius': '25px', 'background-color': 'LightSlateGrey'}), width='auto'),
+        dbc.Col(dbc.Button(id='income-add', n_clicks=0, children='Add Row', style={'borderRadius': '25px', 'background-color': MAIN_COL}), width='auto'),
         dbc.Col(id='income-button', children=INCOME_SAVE, width='auto'),
       ],
       style={'margin-top': '50px'},
@@ -122,10 +126,30 @@ expense_layout = html.Div([html.H3('Warning: Construction Zone')])
 
 # SETTINGS PAGE
 
+def dropdown_template(title, input, button, table):
+  return html.Div([
+    html.H3(title, style={'margin-left': '50px'}),
+    dbc.InputGroup(
+    children=[ # settinc is settings + income
+      dbc.Input(id=input, type='text'),
+      dbc.Button(id=button, children='Add', style={'background-color': MAIN_COL}, n_clicks=0),
+    ],
+    style={'margin-left': '100px', 'width': '400px'},
+    size='sm'
+    ),
+    dash_table.DataTable(
+      id=table,
+      row_deletable=True
+    )
+  ])
+
 settings_layout = html.Div([
-  html.H3('Default Page Size'),
-  html.H3('Type of Income'),
-  html.H3('Type of Expense'),
-  html.H3('Type of Loan'),
-  html.H3('Payment Method'),
+  html.H3('Default Page Size', style={'margin-left': '50px'}),
+  dbc.Input(id='setting-size', style={'margin-left': '100px', 'width': '400px'}, type='number', min=1, size='sm'),
+  dropdown_template('Type of Income', 'settinc', 'settinc-button', 'settinc-tbl'),
+  dropdown_template('Type of Expense', 'settexp', 'settexp-button', 'settexp-tbl'),
+  dropdown_template('Type of Loan', 'settloan', 'settloan-button', 'sett-tbl'),
+  dropdown_template('Payment Method', 'settmop', 'settmop-button', 'settmop-tbl'),
+  html.H3('Export Data', style={'margin-left': '50px', 'color': CONFIRM_COL}),
+  html.H3('Delete Data', style={'margin-left': '50px', 'color': ERROR_COL}),
 ])
