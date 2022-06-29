@@ -23,7 +23,6 @@ tbl_exists = False
 
 '''Initial load, checks if there is new data'''
 def income_init():
-  print('new income page load')
   global show_new, income_df, tbl_exists
   with closing(sqlite3.connect(DBLOC)) as connection:
     with closing(connection.cursor()) as c:
@@ -102,17 +101,11 @@ def init_data():
 '''Updates page size'''
 @callback(
   Output('income-tbl', 'page_size'),
-  Output('page-size', 'data'),
-  Output('income-size', 'value'),
   Input('income-page', 'n_clicks'),
-  State('income-size', 'value'),
-  State('page-size', 'data')
+  State('income-size', 'value')
 )
-def update_page_size(n_clicks, value, data):
-  if n_clicks == 0:
-    return data, data, data
-  else:
-    return value, value, value
+def update_page_size(n_clicks, value):
+ return value
 
 '''
 Adds additional row when clicked.

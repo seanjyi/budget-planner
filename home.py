@@ -8,8 +8,6 @@ from dash import Dash, dcc, html, Input, Output, callback
 import income
 from layouts import home_layout, settings_layout, expense_layout, income_layout
 
-INIT_PAGE_SIZE = 10
-
 '''Navigation bar layout'''
 navbar = dbc.NavbarSimple(
   dbc.Row([
@@ -30,7 +28,6 @@ navbar = dbc.NavbarSimple(
 app_layout = html.Div([
   navbar,
   dcc.Location(id='url', refresh=False),
-  dcc.Store(id='page-size', data=INIT_PAGE_SIZE),  # remembers init_page during user session
   dcc.Store(id='income-tbl-data', storage_type='session'),  # remmeber dcc store bug
   html.Div(id='page-content')
 ])

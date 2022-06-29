@@ -33,8 +33,7 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 
 1. settings
     1. settings layout [by 7/1]
-        1. simple inputs
-        1. ??? fix store bug
+        1. get rid of store
         1. button maker
         1. export button
         1. delete confirm button

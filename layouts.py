@@ -14,6 +14,9 @@ INCOME_SAVE = dbc.Button(id='income-save', n_clicks=0, children='Save', color='i
 MAIN_COL = 'LightSlateGrey'
 ERROR_COL = '#D62828'
 CONFIRM_COL = '#2FDD92'
+PERSISTENCE_TYPE = 'memory' # later change to session, so browser can remember
+
+INIT_PAGE_SIZE = 10
 
 # HOME PAGE 
 
@@ -61,8 +64,21 @@ income_new = html.Div(
 
 input_group = dbc.InputGroup(
   children=[
-    dbc.Input(id='income-size', style={'border-radius': '25px 0 0 25px'}, type='number', min=1, persistence=True, persistence_type='session'),
-    dbc.Button(id='income-page', children='Page Size', style={'border-radius': '0 25px 25px 0', 'background-color': MAIN_COL}, n_clicks=0),
+    dbc.Input(
+      id='income-size', 
+      style={'border-radius': '25px 0 0 25px'}, 
+      value=INIT_PAGE_SIZE, 
+      type='number', 
+      min=1, 
+      persistence=True, 
+      persistence_type=PERSISTENCE_TYPE
+    ),
+    dbc.Button(
+      id='income-page', 
+      children='Page Size', 
+      style={'border-radius': '0 25px 25px 0', 'background-color': MAIN_COL}, 
+      n_clicks=0
+    ),
   ],
   style={'width': '180px', 'margin-right': '10px', 'margin-bottom': '10px'},
   size='sm'
