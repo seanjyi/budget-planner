@@ -65,7 +65,7 @@ income_new = html.Div(
   hidden=True
 )
 
-input_group = dbc.InputGroup(
+income_page_size = dbc.InputGroup(
   children=[
     dbc.Input(
       id='income-size', 
@@ -96,7 +96,7 @@ income_data = html.Div(
       children=[
         dbc.Col(html.H1('Income', style={'text-align': 'center'})),
         dbc.Col(),
-        dbc.Col(input_group, align='end', width='auto'),    
+        dbc.Col(income_page_size, align='end', width='auto'),    
       ],
       style={'margin-top': '10px'}
     ),
@@ -145,31 +145,48 @@ expense_layout = html.Div([html.H3('Warning: Construction Zone')])
 
 # SETTINGS PAGE
 
-def dropdown_template(title, input, button, table):
+def dropdown_template(id, title):
   return html.Div([
-    html.H3(title, style={'margin-top': '10px'}),
+    html.H3(id=id, children=title, style={'margin-top': '10px'}),
     dbc.InputGroup(
     children=[ # settinc is settings + income
-      dbc.Input(id=input, type='text'),
-      dbc.Button(id=button, children='Add', style={'background-color': MAIN_COL}, n_clicks=0),
+      dbc.Input(id=id+'-input', type='text'),
+      dbc.Button(id=id+'-button', children='Add', style={'background-color': MAIN_COL}, n_clicks=0),
     ],
     style={'margin-left': '50px', 'width': '400px'},
     size='sm'
     ),
     dash_table.DataTable(
-      id=table,
+      id=id+'-tbl',
       row_deletable=True
     )
   ])
 
+nav_square = dbc.Nav(
+  children=[
+    dbc.NavLink('Page Size', style={'color': 'white'}, href="#sett-page", external_link=True),
+    dbc.NavLink('Type of Income', style={'color': 'white'}, href="#sett-inc", external_link=True),
+    dbc.NavLink('Type of Expense', style={'color': 'white'}, href="#sett-exp", external_link=True),
+    dbc.NavLink('Type of Loan', style={'color': 'white'}, href="#sett-loan", external_link=True),
+    dbc.NavLink('Type of Payment', style={'color': 'white'}, href="#sett-mop", external_link=True),
+    dbc.NavLink('Export', style={'color': 'white'}, href="#export", external_link=True),
+    dbc.NavLink('Delete', style={'color': 'white'}, href="#delete", external_link=True),
+  ],
+  style={
+    'position': 'fixed', 'top': '200px', 'right': '50px',
+    'background-color': MAIN_COL, 'width': '200px'
+  },
+  vertical=True
+)
+
 settings_layout = html.Div([
-  html.H3('Default Page Size', style={'margin-top': '10px'}),
-  dbc.Input(id='setting-size', style={'margin-left': '50px', 'width': '400px'}, type='number', min=1, size='sm'),
-  dropdown_template('Type of Income', 'sett-inc', 'sett-inc-button', 'sett-inc-tbl'),
-  dropdown_template('Type of Expense', 'sett-exp', 'sett-exp-button', 'sett-exp-tbl'),
-  dropdown_template('Type of Loan', 'sett-loan', 'sett-loan-button', 'sett-loan-tbl'),
-  dropdown_template('Payment Method', 'sett-mop', 'sett-mop-button', 'sett-mop-tbl'),
-  html.H3('Export Data', style={'margin-top': '10px', 'color': CONFIRM_COL}),
+  html.H3(id='sett-page', children='Default Page Size', style={'margin-top': '10px'}),
+  dbc.Input(id='sett-size', style={'margin-left': '50px', 'width': '400px'}, type='number', min=1, size='sm'),
+  dropdown_template('sett-inc', 'Type of Income'),
+  dropdown_template('sett-exp', 'Type of Expense'),
+  dropdown_template('sett-loan', 'Type of Loan'),
+  dropdown_template('sett-mop', 'Payment Method'),
+  html.H3(id='export', children='Export Data', style={'margin-top': '10px', 'color': CONFIRM_COL}),
   dbc.Row([
       dbc.Col([button_template('export-income', 'Income')], width='auto'), 
       dbc.Col([button_template('export-expense', 'Expense')], width='auto')
@@ -177,7 +194,7 @@ settings_layout = html.Div([
     style={'width': '450px'},
     justify='evenly'
   ),
-  html.H3('Delete Data', style={'margin-top': '10px', 'color': ERROR_COL}),
+  html.H3(id='delete', children='Delete Data', style={'margin-top': '10px', 'color': ERROR_COL}),
   dbc.Row([
       dbc.Col([button_template('delete-income', 'Income')], width='auto'), 
       dbc.Col([button_template('delete-expense', 'Expense')], width='auto')
@@ -185,6 +202,7 @@ settings_layout = html.Div([
     style={'width': '450px'},
     justify='evenly'
   ),
+  nav_square
 ],
-style={'margin-left': '50px'}
+style={'margin-left': '50px', 'margin-bottom': '50px'}
 )

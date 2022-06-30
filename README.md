@@ -46,4 +46,4 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 
 ### Possibly bugs to remember
 
-- hi
+- persistence type and temporary storage for input and tbl data
