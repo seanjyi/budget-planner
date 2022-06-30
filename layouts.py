@@ -147,13 +147,13 @@ expense_layout = html.Div([html.H3('Warning: Construction Zone')])
 
 def dropdown_template(title, input, button, table):
   return html.Div([
-    html.H3(title, style={'margin-left': '50px'}),
+    html.H3(title, style={'margin-top': '10px'}),
     dbc.InputGroup(
     children=[ # settinc is settings + income
       dbc.Input(id=input, type='text'),
       dbc.Button(id=button, children='Add', style={'background-color': MAIN_COL}, n_clicks=0),
     ],
-    style={'margin-left': '100px', 'width': '400px'},
+    style={'margin-left': '50px', 'width': '400px'},
     size='sm'
     ),
     dash_table.DataTable(
@@ -163,12 +163,28 @@ def dropdown_template(title, input, button, table):
   ])
 
 settings_layout = html.Div([
-  html.H3('Default Page Size', style={'margin-left': '50px'}),
-  dbc.Input(id='setting-size', style={'margin-left': '100px', 'width': '400px'}, type='number', min=1, size='sm'),
-  dropdown_template('Type of Income', 'settinc', 'settinc-button', 'settinc-tbl'),
-  dropdown_template('Type of Expense', 'settexp', 'settexp-button', 'settexp-tbl'),
-  dropdown_template('Type of Loan', 'settloan', 'settloan-button', 'sett-tbl'),
-  dropdown_template('Payment Method', 'settmop', 'settmop-button', 'settmop-tbl'),
-  html.H3('Export Data', style={'margin-left': '50px', 'color': CONFIRM_COL}),
-  html.H3('Delete Data', style={'margin-left': '50px', 'color': ERROR_COL}),
-])
+  html.H3('Default Page Size', style={'margin-top': '10px'}),
+  dbc.Input(id='setting-size', style={'margin-left': '50px', 'width': '400px'}, type='number', min=1, size='sm'),
+  dropdown_template('Type of Income', 'sett-inc', 'sett-inc-button', 'sett-inc-tbl'),
+  dropdown_template('Type of Expense', 'sett-exp', 'sett-exp-button', 'sett-exp-tbl'),
+  dropdown_template('Type of Loan', 'sett-loan', 'sett-loan-button', 'sett-loan-tbl'),
+  dropdown_template('Payment Method', 'sett-mop', 'sett-mop-button', 'sett-mop-tbl'),
+  html.H3('Export Data', style={'margin-top': '10px', 'color': CONFIRM_COL}),
+  dbc.Row([
+      dbc.Col([button_template('export-income', 'Income')], width='auto'), 
+      dbc.Col([button_template('export-expense', 'Expense')], width='auto')
+    ],
+    style={'width': '450px'},
+    justify='evenly'
+  ),
+  html.H3('Delete Data', style={'margin-top': '10px', 'color': ERROR_COL}),
+  dbc.Row([
+      dbc.Col([button_template('delete-income', 'Income')], width='auto'), 
+      dbc.Col([button_template('delete-expense', 'Expense')], width='auto')
+    ],
+    style={'width': '450px'},
+    justify='evenly'
+  ),
+],
+style={'margin-left': '50px'}
+)
