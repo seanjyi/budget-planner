@@ -1,7 +1,8 @@
 '''
-Handles user input related to income. Shows a data table
-that the user can edit or add to. Additionally, can save the
-data table or change page size.
+Handles user input related to income. When there isn't
+previous data, shows an option to add a CSV file or start
+new data. Will show an editable data table when there is data.
+Can change page size, save or add an additional row.
 '''
 
 import sqlite3
@@ -15,11 +16,11 @@ from time import sleep
 from settings import DBLOC
 from layouts import INCOME_SAVE, CONFIRM_COL
 
-'''Global variable to show different pages'''
+'''Global variable to show different sections'''
 income_df = pd.DataFrame(data=range(5))
 show_new = True  # true to show income_new
-first_read = True
-tbl_exists = False
+first_read = True # true when initializing reading
+tbl_exists = False # true when there is inital data 
 
 '''Initial load, checks if there is new data'''
 def income_init():
@@ -56,9 +57,9 @@ def data_update(upload, empty, add, data, col):
   trigger_id = ctx.triggered_id
   if trigger_id == 'income-upload' and upload is not None:
     return load_data(upload)
-  elif trigger_id == 'income-empty' and empty != 0:
+  elif trigger_id == 'income-empty' and empty > 0:
     return init_data()
-  elif trigger_id == 'income-add' and add != 0:
+  elif trigger_id == 'income-add' and add > 0:
     return add_row(data, col)
   elif tbl_exists and first_read:
     first_read = False
@@ -131,9 +132,8 @@ Additionally, updates the dataframe when saved.
 def save_file(n_clicks, data):
   with closing(sqlite3.connect(DBLOC)) as connection:
     pd.DataFrame(data).to_sql('income', con=connection, if_exists='replace', index=False)
-
     # print(pd.read_sql_query('SELECT * FROM income', connection))
-  return 'Saved!', {'borderRadius': '25px', 'width':'100px', 'background-color': '#2FDD92'}, 'load_trigger'
+  return 'Saved!', {'borderRadius': '25px', 'width':'125px', 'background-color': CONFIRM_COL}, 'load_trigger'
 
 '''
 Loading time for save button. Visual 

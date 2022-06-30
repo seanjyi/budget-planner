@@ -9,14 +9,23 @@ from dash.dash_table.Format import Format, Scheme, Symbol
 
 # Order of parameters: id > children > style > etc
 
-INCOME_SAVE = dbc.Button(id='income-save', n_clicks=0, children='Save', color='info', style={'borderRadius': '25px', 'width':'100px'})
-
 MAIN_COL = 'LightSlateGrey'
 ERROR_COL = '#D62828'
 CONFIRM_COL = '#2FDD92'
 PERSISTENCE_TYPE = 'memory' # later change to session, so browser can remember
 
 INIT_PAGE_SIZE = 10
+
+def button_template(id, text, bg_color=None):
+  return dbc.Button(
+    id=id, 
+    children=text, 
+    style={'borderRadius': '25px', 'width':'125px', 'background-color': bg_color},
+    n_clicks=0, 
+    color='info'
+  )
+
+INCOME_SAVE = button_template('income-save', 'Save')
 
 # HOME PAGE 
 
@@ -45,13 +54,7 @@ income_new = html.Div(
       }
     ),
     html.Plaintext('or'),
-    dbc.Button(
-      id='income-empty',
-      children='New Data',
-      style={'borderRadius': '25px'},
-      n_clicks=0,
-      color='info'
-    )
+    button_template('income-empty', 'New Data')
   ],
   # positions upload and new data button to middle of screen
   style={
@@ -123,7 +126,7 @@ income_data = html.Div(
     # positions add and save button
     dbc.Row(
       [
-        dbc.Col(dbc.Button(id='income-add', n_clicks=0, children='Add Row', style={'borderRadius': '25px', 'background-color': MAIN_COL}), width='auto'),
+        dbc.Col(button_template('income-add', 'Add Row', MAIN_COL), width='auto'),
         dbc.Col(id='income-button', children=INCOME_SAVE, width='auto'),
       ],
       style={'margin-top': '50px'},

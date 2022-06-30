@@ -6,21 +6,21 @@ and also handles multiple page navigation.
 import dash_bootstrap_components as dbc
 from dash import Dash, dcc, html, Input, Output, callback
 import income
-from layouts import home_layout, settings_layout, expense_layout, income_layout
+from layouts import home_layout, settings_layout, expense_layout, income_layout, MAIN_COL
 
 '''Navigation bar layout'''
 navbar = dbc.NavbarSimple(
   dbc.Row([
-      dbc.Col(dbc.NavItem(dbc.NavLink("Github", href="https://github.com/seanjyi/budget-planner"))),
-      dbc.Col(dbc.NavItem(dbc.NavLink("Income", href="/income"))),
-      dbc.Col(dbc.NavItem(dbc.NavLink("Expense", href="/expense"))),
-      dbc.Col(dbc.NavItem(dbc.NavLink(html.Img(src='assets/gear.png', height='30px'), href="/settings")))
+      dbc.Col(dbc.NavItem(dbc.NavLink('Github', href='https://github.com/seanjyi/budget-planner'))),
+      dbc.Col(dbc.NavItem(dbc.NavLink('Income', href='/income'))),
+      dbc.Col(dbc.NavItem(dbc.NavLink('Expense', href='/expense'))),
+      dbc.Col(dbc.NavItem(dbc.NavLink(html.Img(src='assets/gear.png', height='30px'), href='/settings')))
     ],
     align='center'
   ),
-  brand="Finance",
-  brand_href="/home",
-  color="LightSlateGrey",  # color of navBar
+  brand='Finance',
+  brand_href='/home',
+  color=MAIN_COL,  # color of navBar
   dark=True
 )
 

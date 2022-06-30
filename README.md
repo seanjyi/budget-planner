@@ -33,11 +33,11 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 
 1. settings
     1. settings layout [by 7/1]
-        1. get rid of store
         1. button maker
         1. export button
         1. delete confirm button
         1. jump w/ jump logic
+        1. css update, rem?
     1. page size logic with sql
     1. add/delete to data table logic
     1. sql logic
@@ -45,3 +45,7 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
     1. data deletion and export  [by 7/8]
 1. expense
 1. home [start by 7/14]
+
+### Possibly bugs to remember
+
+- hi
