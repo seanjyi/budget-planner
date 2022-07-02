@@ -6,6 +6,7 @@ and also handles multiple page navigation.
 import dash_bootstrap_components as dbc
 from dash import Dash, dcc, html, Input, Output, callback
 import income
+import settings
 from layouts import home_layout, settings_layout, expense_layout, income_layout, MAIN_COL
 
 '''Navigation bar layout'''
@@ -29,6 +30,7 @@ app_layout = html.Div([
   navbar,
   dcc.Location(id='url', refresh=False),
   dcc.Store(id='income-tbl-data', storage_type='session'),  # remmeber dcc store bug
+  dcc.Store(id='income-page-size', storage_type='session'),  # remmeber dcc store bug
   html.Div(id='page-content')
 ])
 
@@ -55,6 +57,7 @@ if __name__ == '__main__':
   app.title = 'Budget Planner'
   app.layout = app_layout
 
+  settings.sett_init()
   income.income_init()
 
-  app.run_server(debug=True, use_reloader=True)  # temp not disabled hot fix on, okay to use hot fix w/ ':memory:' 
+  app.run_server(debug=True, use_reloader=False)  # temp not disabled hot fix on, okay to use hot fix w/ ':memory:' 

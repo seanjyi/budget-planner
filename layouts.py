@@ -12,9 +12,6 @@ from dash.dash_table.Format import Format, Scheme, Symbol
 MAIN_COL = 'LightSlateGrey'
 ERROR_COL = '#D62828'
 CONFIRM_COL = '#2FDD92'
-PERSISTENCE_TYPE = 'memory' # later change to session, so browser can remember
-
-INIT_PAGE_SIZE = 10
 
 def button_template(id, text, bg_color=None):
   return dbc.Button(
@@ -70,11 +67,8 @@ income_page_size = dbc.InputGroup(
     dbc.Input(
       id='income-size', 
       style={'border-radius': '25px 0 0 25px'}, 
-      value=INIT_PAGE_SIZE, 
       type='number', 
-      min=1, 
-      persistence=True, 
-      persistence_type=PERSISTENCE_TYPE
+      min=1
     ),
     dbc.Button(
       id='income-page', 
@@ -181,7 +175,13 @@ nav_square = dbc.Nav(
 
 settings_layout = html.Div([
   html.H3(id='sett-page', children='Default Page Size', style={'margin-top': '10px'}),
-  dbc.Input(id='sett-size', style={'margin-left': '50px', 'width': '400px'}, type='number', min=1, size='sm'),
+  dbc.Input(
+    id='sett-size', 
+    style={'margin-left': '50px', 'width': '400px'}, 
+    type='number', 
+    min=1, 
+    size='sm'
+  ),
   dropdown_template('sett-inc', 'Type of Income'),
   dropdown_template('sett-exp', 'Type of Expense'),
   dropdown_template('sett-loan', 'Type of Loan'),

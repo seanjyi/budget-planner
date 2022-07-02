@@ -32,18 +32,16 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 ### Priority One List
 
 1. settings
-    1. settings layout [by 7/1]
-        1. jump w/ jump logic
-        1. css update, rem?
     1. page size logic with sql
+    1. update ctx.triggered_id can tell if its the first read
     1. add/delete to data table logic
-        1. additionally add deletion confirmation: reclick delete button
-    1. sql logic
     1. drop down and repayment columns on income
-    1. data deletion and export  [by 7/8]
+    1. data deletion and export
+        1. additionally add deletion confirmation: reclick delete button
 1. expense
 1. home [start by 7/14]
 
 ### Possibly bugs to remember
 
 - persistence type and temporary storage for input and tbl data
+- css px might need to be switched to rem

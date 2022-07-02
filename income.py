@@ -13,7 +13,7 @@ from contextlib import closing
 from base64 import b64decode
 from io import StringIO
 from time import sleep
-from settings import DBLOC
+from settings import DBLOC, get_size
 from layouts import INCOME_SAVE, CONFIRM_COL
 
 '''Global variable to show different sections'''
@@ -21,6 +21,7 @@ income_df = pd.DataFrame(data=range(5))
 show_new = True  # true to show income_new
 first_read = True # true when initializing reading
 tbl_exists = False # true when there is inital data 
+page_first = True
 
 '''Initial load, checks if there is new data'''
 def income_init():
@@ -99,14 +100,29 @@ def init_data():
 
 # INCOME_DATA CALLBACKS
 
-'''Updates page size'''
+'''
+Updates page size. When initally loading the app,
+will take default page size from sql.
+If reloading, will take from dcc.Store.
+If by button, will take from value.
+'''
 @callback(
   Output('income-tbl', 'page_size'),
+  Output('income-size', 'value'),
+  Output('income-page-size', 'data'),
   Input('income-page', 'n_clicks'),
-  State('income-size', 'value')
+  State('income-size', 'value'),
+  State('income-page-size', 'data')
 )
-def update_page_size(n_clicks, value):
- return value
+def update_page_size(n_clicks, value, data):
+  global page_first
+  if n_clicks == 0 and page_first:
+    page_first = False
+    return get_size(), get_size(), get_size()
+  elif n_clicks == 0 and not page_first:
+    return data, data, data
+  else:
+    return value, value, value
 
 '''
 Adds additional row when clicked.
