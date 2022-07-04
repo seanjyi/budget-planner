@@ -60,4 +60,4 @@ if __name__ == '__main__':
   settings.sett_init()
   income.income_init()
 
-  app.run_server(debug=True, use_reloader=False)  # temp not disabled hot fix on, okay to use hot fix w/ ':memory:' 
+  app.run_server(debug=True, use_reloader=True)  # temp not disabled hot fix on, okay to use hot fix w/ ':memory:' 

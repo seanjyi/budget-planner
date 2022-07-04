@@ -21,7 +21,7 @@ income_df = pd.DataFrame(data=range(5))
 show_new = True  # true to show income_new
 first_read = True # true when initializing reading
 tbl_exists = False # true when there is inital data 
-page_first = True
+page_first = True # true when page is first read
 
 '''Initial load, checks if there is new data'''
 def income_init():

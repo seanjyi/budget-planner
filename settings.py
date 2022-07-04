@@ -33,6 +33,9 @@ def sett_init():
 def get_size():
   return page_size
 
+def sortByValue(e):
+  return e['']
+
 @callback(
   Output('sett-size', 'value'),
   Input('sett-size', 'value')
@@ -46,3 +49,18 @@ def default_size(value):
     with closing(sqlite3.connect(DBLOC)) as connection:
       pd.DataFrame(data={'size': [page_size]}).to_sql('page_size', con=connection, if_exists='replace', index=False)
     return value
+
+@callback(
+  Output('sett-inc-tbl', 'data'),
+  Input('sett-inc-button', 'n_clicks'),
+  State('sett-inc-tbl', 'data'),
+  State('sett-inc-input', 'value'),
+  prevent_initial_call=True
+)
+def sett_inc_add(n_clicks, data, value):
+  if data == None:
+    return [{'': value}]
+  else: 
+    data.append({'': value})
+    data.sort(key=sortByValue)
+    return data

@@ -32,8 +32,6 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 ### Priority One List
 
 1. settings
-    1. page size logic with sql
-    1. update ctx.triggered_id can tell if its the first read
     1. add/delete to data table logic
     1. drop down and repayment columns on income
     1. data deletion and export

@@ -147,14 +147,17 @@ def dropdown_template(id, title):
       dbc.Input(id=id+'-input', type='text'),
       dbc.Button(id=id+'-button', children='Add', style={'background-color': MAIN_COL}, n_clicks=0),
     ],
-    style={'margin-left': '50px', 'width': '400px'},
+    style={'margin-left': '50px'},
     size='sm'
     ),
     dash_table.DataTable(
       id=id+'-tbl',
+      style_header = {'display': 'none'},
       row_deletable=True
     )
-  ])
+  ],
+  style={'width': '450px'}
+  )
 
 nav_square = dbc.Nav(
   children=[
