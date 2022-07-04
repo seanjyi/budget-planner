@@ -32,8 +32,10 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 ### Priority One List
 
 1. settings
-    1. add/delete to data table logic
-    1. drop down and repayment columns on income
+    1. single column test: drop down
+    1. add repayment
+    1. copy logic to other tables
+    1. CSS
     1. data deletion and export
         1. additionally add deletion confirmation: reclick delete button
 1. expense

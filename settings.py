@@ -14,14 +14,16 @@ from layouts import INCOME_SAVE, CONFIRM_COL
 
 '''Global variable to check previous data'''
 page_size = 10
+type_income = pd.DataFrame()
 
-DBLOC = ':memory:' # change to 'data/budget.db' or ':memory:'
+DBLOC = 'data/budget.db' # change to 'data/budget.db' or ':memory:'
 
 '''Initial load, checks for past data'''
 def sett_init():
-  global page_size
+  global page_size, type_income
   with closing(sqlite3.connect(DBLOC)) as connection:
     with closing(connection.cursor()) as c:
+      # checks page size
       if c.execute("SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='page_size')").fetchone()[0] == 0:
         c.execute('''CREATE TABLE page_size (
         size INTEGER NOT NULL
@@ -29,12 +31,19 @@ def sett_init():
         pd.DataFrame(data={'size': [page_size]}).to_sql('page_size', con=connection, if_exists='replace', index=False)
       else:
         page_size = pd.read_sql_query('SELECT * FROM page_size', connection)['size'].iloc[0]
+      # checks type of income
+      if c.execute("SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='type_income')").fetchone()[0] == 0:
+        c.execute('''CREATE TABLE type_income (
+        type TEXT NOT NULL
+        )''')
+      else:
+        type_income = pd.read_sql_query('SELECT * FROM type_income', connection)
 
 def get_size():
   return page_size
 
-def sortByValue(e):
-  return e['']
+def sortByValue(list):
+  return list['type']
 
 @callback(
   Output('sett-size', 'value'),
@@ -54,13 +63,14 @@ def default_size(value):
   Output('sett-inc-tbl', 'data'),
   Input('sett-inc-button', 'n_clicks'),
   State('sett-inc-tbl', 'data'),
-  State('sett-inc-input', 'value'),
-  prevent_initial_call=True
+  State('sett-inc-input', 'value')
 )
 def sett_inc_add(n_clicks, data, value):
   if data == None:
-    return [{'': value}]
+    return  type_income.to_dict('records')
   else: 
-    data.append({'': value})
+    data.append({'type': value})
     data.sort(key=sortByValue)
+    with closing(sqlite3.connect(DBLOC)) as connection:
+      pd.DataFrame(data).to_sql('type_income', con=connection, if_exists='replace', index=False)
     return data
