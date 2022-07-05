@@ -8,3 +8,7 @@
   background-repeat: repeat;
   color: transparent;
 }
+
+.Select-menu-outer {
+  display : block !important;
+}

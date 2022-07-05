@@ -16,7 +16,7 @@ from layouts import INCOME_SAVE, CONFIRM_COL
 page_size = 10
 type_income = pd.DataFrame()
 
-DBLOC = 'data/budget.db' # change to 'data/budget.db' or ':memory:'
+DBLOC = ':memory:' # change to 'data/budget.db' or ':memory:'
 
 '''Initial load, checks for past data'''
 def sett_init():
@@ -42,6 +42,9 @@ def sett_init():
 def get_size():
   return page_size
 
+def get_type_income():
+  return type_income
+
 def sortByValue(list):
   return list['type']
 
@@ -66,11 +69,14 @@ def default_size(value):
   State('sett-inc-input', 'value')
 )
 def sett_inc_add(n_clicks, data, value):
+  global type_income
   if data == None:
-    return  type_income.to_dict('records')
+    return type_income.to_dict('records')
   else: 
     data.append({'type': value})
     data.sort(key=sortByValue)
     with closing(sqlite3.connect(DBLOC)) as connection:
       pd.DataFrame(data).to_sql('type_income', con=connection, if_exists='replace', index=False)
+
+    type_income = pd.DataFrame(data=data)
     return data

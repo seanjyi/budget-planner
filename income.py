@@ -13,14 +13,13 @@ from contextlib import closing
 from base64 import b64decode
 from io import StringIO
 from time import sleep
-from settings import DBLOC, get_size
+from settings import DBLOC, get_size, get_type_income
 from layouts import INCOME_SAVE, CONFIRM_COL
 
 '''Global variable to show different sections'''
 income_df = pd.DataFrame(data=range(5))
-show_new = True  # true to show income_new
+show_new = True # true to show income_new
 first_read = True # true when initializing reading
-tbl_exists = False # true when there is inital data 
 page_first = True # true when page is first read
 
 '''Initial load, checks if there is new data'''
@@ -39,7 +38,6 @@ def income_init():
       else:
         income_df = pd.read_sql_query('SELECT * FROM income', connection)
         show_new = False
-        tbl_exists = True
 
 ''' Income table update logic '''
 @callback(
@@ -62,7 +60,7 @@ def data_update(upload, empty, add, data, col):
     return init_data()
   elif trigger_id == 'income-add' and add > 0:
     return add_row(data, col)
-  elif tbl_exists and first_read:
+  elif first_read:
     first_read = False
     return not show_new, show_new, income_df.to_dict('records'), no_update
   else:
@@ -99,6 +97,23 @@ def init_data():
   return not show_new, show_new, income_df.to_dict('records'), no_update
 
 # INCOME_DATA CALLBACKS
+
+'''Updates dropdown'''
+@callback(
+  Output('income-tbl', 'dropdown'),
+  Input('income-tbl', 'dropdown')
+)
+def tbl_dropdown(dropdown):
+  if get_type_income().empty:
+    return no_update
+  else:
+    return {
+      'category': {
+        'options': [
+          {'label': i, 'value': i} for i in get_type_income()['type']
+        ]
+      }
+    }
 
 '''
 Updates page size. When initally loading the app,

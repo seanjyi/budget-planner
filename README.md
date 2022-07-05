@@ -11,7 +11,7 @@ The following project is built upon dash and dash-bootstrap-components ~~with ra
 | library                   | versions  |
 | ------------------------- |-----------|
 | python                    | 3.9.12    |
-| dash                      | 2.4.1     |
+| dash                      | 2.5.1     |
 | dash-bootstrap-components | 1.1.0     |
 | dash-core-components      | 2.0.0     |
 | pandas                    | 1.4.2     |

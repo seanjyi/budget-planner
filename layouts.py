@@ -98,7 +98,7 @@ income_data = html.Div(
       id='income-tbl',
       columns=[
         {'id': 'date', 'name': 'Date', 'type': 'datetime'}, 
-        {'id': 'category', 'name': 'Category', 'type': 'text'},
+        {'id': 'category', 'name': 'Category', 'type': 'text', 'presentation': 'dropdown'},
         {'id': 'amount', 'name': 'Amount ($)', 'type': 'numeric', 'format': Format(precision=2, symbol=Symbol.yes, scheme=Scheme.fixed).group(True)}, 
         {'id': 'mop', 'name': 'MOP', 'type': 'text'},
         {'id': 'notes', 'name': 'Notes', 'type': 'text'}
