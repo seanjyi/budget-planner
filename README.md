@@ -32,9 +32,7 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 ### Priority One List
 
 1. settings
-    1. single column test: drop down
-    1. add repayment
-    1. copy logic to other tables
+    1. work out bugs
     1. CSS
     1. data deletion and export
         1. additionally add deletion confirmation: reclick delete button
@@ -45,3 +43,7 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 
 - persistence type and temporary storage for input and tbl data
 - css px might need to be switched to rem
+
+### helpful links
+
+- https://techblogs.azurewebsites.net/2020/11/23/why-sometimes-the-dropdown-list-does-not-show-up-in-a-dash-table/

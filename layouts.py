@@ -36,7 +36,7 @@ income_new = html.Div(
   id='income-new',
   children=[
     html.Div(
-      id='income-error', 
+      id='income-upload-error', 
       children='Selected file type must be CSV',
       style={'color': ERROR_COL},
       hidden=True
@@ -98,9 +98,10 @@ income_data = html.Div(
       id='income-tbl',
       columns=[
         {'id': 'date', 'name': 'Date', 'type': 'datetime'}, 
-        {'id': 'category', 'name': 'Category', 'type': 'text', 'presentation': 'dropdown'},
+        {'id': 'category', 'name': 'Category', 'presentation': 'dropdown'},
         {'id': 'amount', 'name': 'Amount ($)', 'type': 'numeric', 'format': Format(precision=2, symbol=Symbol.yes, scheme=Scheme.fixed).group(True)}, 
-        {'id': 'mop', 'name': 'MOP', 'type': 'text'},
+        {'id': 'mop', 'name': 'MOP', 'presentation': 'dropdown'},
+        {'id': 'repay', 'name': 'Repayment', 'presentation': 'dropdown'},
         {'id': 'notes', 'name': 'Notes', 'type': 'text'}
       ],
       style_cell={'text-align': 'center'},
@@ -116,6 +117,12 @@ income_data = html.Div(
       }],
       editable=True,
       row_deletable=True
+    ),
+    html.Div(
+      id='income-tbl-error', 
+      children='Incomplete income & payment dropdown lists:\nGo to Settings and finish lists',
+      style={'color': ERROR_COL, 'whiteSpace': 'pre-wrap', 'margin': '10px'},
+      hidden=True
     ),
     # positions add and save button
     dbc.Row(
@@ -165,7 +172,7 @@ nav_square = dbc.Nav(
     dbc.NavLink('Type of Income', style={'color': 'white'}, href="#sett-inc", external_link=True),
     dbc.NavLink('Type of Expense', style={'color': 'white'}, href="#sett-exp", external_link=True),
     dbc.NavLink('Type of Loan', style={'color': 'white'}, href="#sett-loan", external_link=True),
-    dbc.NavLink('Type of Payment', style={'color': 'white'}, href="#sett-mop", external_link=True),
+    dbc.NavLink('Type of Payment', style={'color': 'white'}, href="#sett-pay", external_link=True),
     dbc.NavLink('Export', style={'color': 'white'}, href="#export", external_link=True),
     dbc.NavLink('Delete', style={'color': 'white'}, href="#delete", external_link=True),
   ],
@@ -188,7 +195,7 @@ settings_layout = html.Div([
   dropdown_template('sett-inc', 'Type of Income'),
   dropdown_template('sett-exp', 'Type of Expense'),
   dropdown_template('sett-loan', 'Type of Loan'),
-  dropdown_template('sett-mop', 'Payment Method'),
+  dropdown_template('sett-pay', 'Payment Method'),
   html.H3(id='export', children='Export Data', style={'margin-top': '10px', 'color': CONFIRM_COL}),
   dbc.Row([
       dbc.Col([button_template('export-income', 'Income')], width='auto'), 

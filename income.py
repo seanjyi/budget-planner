@@ -13,7 +13,7 @@ from contextlib import closing
 from base64 import b64decode
 from io import StringIO
 from time import sleep
-from settings import DBLOC, get_size, get_type_income
+from settings import DBLOC, get_size, get_type_income, get_type_expense, get_type_loan, get_type_pay
 from layouts import INCOME_SAVE, CONFIRM_COL
 
 '''Global variable to show different sections'''
@@ -44,7 +44,7 @@ def income_init():
   Output('income-new', 'hidden'),
   Output('income-data', 'hidden'),
   Output('income-tbl', 'data'),
-  Output('income-error', 'hidden'),
+  Output('income-upload-error', 'hidden'),
   Input('income-upload', 'contents'),
   Input('income-empty', 'n_clicks'),
   Input('income-add', 'n_clicks'),
@@ -98,20 +98,33 @@ def init_data():
 
 # INCOME_DATA CALLBACKS
 
-'''Updates dropdown'''
+'''
+Updates dropdown.
+Category dropdown is type of income with type of loans.
+Payment dropdown is type of payments.
+Repayment dropdown is type of expense.
+Type of income and payment is necessary.
+'''
 @callback(
+  Output('income-tbl-error', 'hidden'),
   Output('income-tbl', 'dropdown'),
   Input('income-tbl', 'dropdown')
 )
 def tbl_dropdown(dropdown):
-  if get_type_income().empty:
-    return no_update
+  if get_type_income().empty or get_type_pay().empty:
+    return False, no_update
   else:
-    return {
+    return True, {
       'category': {
-        'options': [
-          {'label': i, 'value': i} for i in get_type_income()['type']
-        ]
+        'options': ([{'label': i, 'value': i} for i in get_type_income()['type']]) if get_type_loan().empty
+        else ([{'label': i, 'value': i} for i in get_type_income()['type']] + [{'label': i, 'value': i} for i in get_type_loan()['type']])
+      },
+      'mop': {
+        'options': [{'label': i, 'value': i} for i in get_type_pay()['type']]
+      },
+      'repay': {
+        'options': ([{'label': i, 'value': i} for i in get_type_expense()]) if get_type_loan().empty
+        else ([{'label': i, 'value': i} for i in get_type_expense()['type']])
       }
     }
 
