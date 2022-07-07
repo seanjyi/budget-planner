@@ -32,12 +32,10 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 ### Priority One List
 
 1. settings
-    1. major code structure change
-    1. bugs
-    1. CSS & possible loading states
+    1. kink out bugs & add loading state
+    1. css visual update << finish by friday
     1. data deletion and export
         1. additionally add deletion confirmation: reclick delete button
-    1. add clearable to data table
 1. expense
 1. home [start by 7/14]
 
@@ -46,6 +44,7 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 - persistence type and temporary storage for input and tbl data
 - css px might need to be switched to rem
 - income should sort data by date...
+- possible trigger, instead of copying of data
 
 ### helpful links
 

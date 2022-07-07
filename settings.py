@@ -98,27 +98,30 @@ Adds new values, when button is clicked.
 Ignores null or empty values.
 '''
 @callback(
+  Output('sett-inc-input', 'value'),
   Output('sett-inc-tbl', 'data'),
   Output('sett-inc-store', 'data'),
   Input('sett-inc-button', 'n_clicks'),
-  State('sett-inc-tbl', 'data'),
+  Input('sett-inc-tbl', 'data'),
   State('sett-inc-input', 'value'),
   State('sett-inc-store', 'data')
 )
 def sett_inc_add(n_clicks, data, value, store):
   if data == None and store == None:
-    return type_income.to_dict('records'), type_income.to_dict('records')
+    return None, type_income.to_dict('records'), type_income.to_dict('records')
   elif data == None:
-    return store, store
+    return None, store, store
+  elif ctx.triggered_id == 'sett-inc-tbl':
+    return None, data, data
   elif value == None or value == '':
-    return no_update, no_update
+    return no_update, no_update, no_update
   else: 
     data.append({'type': value})
     data.sort(key=sortByValue)
     with closing(sqlite3.connect(DBLOC)) as connection:
       pd.DataFrame(data).to_sql('type_income', con=connection, if_exists='replace', index=False)
 
-    return data, data
+    return None, data, data
 
 '''
 Loads previous dropdown expense values.
@@ -126,27 +129,30 @@ Adds new values, when button is clicked.
 Ignores null or empty values.
 '''
 @callback(
+  Output('sett-exp-input', 'value'),
   Output('sett-exp-tbl', 'data'),
   Output('sett-exp-store', 'data'),
   Input('sett-exp-button', 'n_clicks'),
-  State('sett-exp-tbl', 'data'),
+  Input('sett-exp-tbl', 'data'),
   State('sett-exp-input', 'value'),
   State('sett-exp-store', 'data')
 )
-def sett_inc_add(n_clicks, data, value, store):
+def sett_exp_add(n_clicks, data, value, store):
   if data == None and store == None:
-    return type_expense.to_dict('records'), type_expense.to_dict('records')
+    return None, type_expense.to_dict('records'), type_expense.to_dict('records')
   elif data == None:
-    return store, store
+    return None, store, store
+  elif ctx.triggered_id == 'sett-exp-tbl':
+    return None, data, data
   elif value == None or value == '':
-    return no_update, no_update
+    return no_update, no_update, no_update
   else: 
     data.append({'type': value})
     data.sort(key=sortByValue)
     with closing(sqlite3.connect(DBLOC)) as connection:
       pd.DataFrame(data).to_sql('type_expense', con=connection, if_exists='replace', index=False)
 
-    return data, data
+    return None, data, data
 
 '''
 Loads previous dropdown loan values.
@@ -154,27 +160,30 @@ Adds new values, when button is clicked.
 Ignores null or empty values.
 '''
 @callback(
+  Output('sett-loan-input', 'value'),
   Output('sett-loan-tbl', 'data'),
   Output('sett-loan-store', 'data'),
   Input('sett-loan-button', 'n_clicks'),
-  State('sett-loan-tbl', 'data'),
+  Input('sett-loan-tbl', 'data'),
   State('sett-loan-input', 'value'),
   State('sett-loan-store', 'data')
 )
-def sett_inc_add(n_clicks, data, value, store):
+def sett_loan_add(n_clicks, data, value, store):
   if data == None and store == None:
-    return type_loan.to_dict('records'), type_loan.to_dict('records')
+    return None, type_loan.to_dict('records'), type_loan.to_dict('records')
   elif data == None:
-    return store, store
+    return None, store, store
+  elif ctx.triggered_id == 'sett-loan-tbl':
+    return None, data, data
   elif value == None or value == '':
-    return no_update, no_update
+    return no_update, no_update, no_update
   else: 
     data.append({'type': value})
     data.sort(key=sortByValue)
     with closing(sqlite3.connect(DBLOC)) as connection:
       pd.DataFrame(data).to_sql('type_loan', con=connection, if_exists='replace', index=False)
 
-    return data, data
+    return None, data, data
 
 '''
 Loads previous dropdown payment values.
@@ -182,25 +191,28 @@ Adds new values, when button is clicked.
 Ignores null or empty values.
 '''
 @callback(
+  Output('sett-pay-input', 'value'),
   Output('sett-pay-tbl', 'data'),
   Output('sett-pay-store', 'data'),
   Input('sett-pay-button', 'n_clicks'),
-  State('sett-pay-tbl', 'data'),
+  Input('sett-pay-tbl', 'data'),
   State('sett-pay-input', 'value'),
   State('sett-pay-store', 'data')
 )
-def sett_inc_add(n_clicks, data, value, store):
+def sett_pay_add(n_clicks, data, value, store):
   if data == None and store == None:
-    return type_pay.to_dict('records'), type_pay.to_dict('records')
+    return None, type_pay.to_dict('records'), type_pay.to_dict('records')
   elif data == None:
-    return store, store
+    return None, store, store
+  elif ctx.triggered_id == 'sett-pay-tbl':
+    return None, data, data
   elif value == None or value == '':
-    return no_update, no_update
+    return no_update, no_update, no_update
   else: 
     data.append({'type': value})
     data.sort(key=sortByValue)
     with closing(sqlite3.connect(DBLOC)) as connection:
       pd.DataFrame(data).to_sql('type_pay', con=connection, if_exists='replace', index=False)
 
-    return data, data
+    return None, data, data
   

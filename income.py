@@ -44,31 +44,29 @@ Else, recieves data from upload or new data button.
 '''
 @callback(
   Output('income-upload-error', 'hidden'),
-  Output('income-load', 'data'),
+  Output('income-trigger', 'data'),
   Input('income-upload', 'contents'),
   Input('income-empty', 'n_clicks'),
 )
 def new_income(upload, empty):
   trigger_id = ctx.triggered_id
   if not income_df.empty:
-    return no_update, income_df.to_dict('records')
+    return no_update, 'load'
   elif trigger_id == 'income-upload' and upload is not None:
     upload_type, upload_string = upload.split(',')
     if upload_type != 'data:application/vnd.ms-excel;base64':
       return False, no_update
     else:
-      df = pd.read_csv(StringIO(b64decode(upload_string).decode('utf-8')))
-      return no_update, df.to_dict('records')
+      return no_update, 'upload'
   elif trigger_id == 'income-empty' and empty > 0:
-    df = pd.DataFrame(data=range(5))
-    return no_update, df.to_dict('records')
+    return no_update, 'empty'
   else:
     return no_update, no_update
 
 ''' Page connection logic '''
 @callback(
   Output('income-content', 'children'),
-  Input('income-load', 'data'),
+  Input('income-trigger', 'data'),
   prevent_initial_call=True
 )
 def income_connect(data):
@@ -80,31 +78,39 @@ def income_connect(data):
 # INCOME_DATA CALLBACKS
 
 '''
-Adds additional row when clicked.
-Also, when initally loaded, corrects date formatting
-and sorts by date.
+Initializes given data
+'''
+def inititalize_data(initial):
+  if initial == 'load':
+    return income_df.to_dict('records')
+  elif initial == 'upload':
+    upload_type, upload_string = upload.split(',')
+    return pd.read_csv(StringIO(b64decode(upload_string).decode('utf-8'))).to_dict('records')
+  elif initial == 'empty':
+    return pd.DataFrame(data=range(5)).to_dict('records')
+  else:
+    print('Income error')
+    return no_update
+
+'''
+Updates page size. When initally loading the app or page,
+will take default page size from sql.
+If by button, will take from value.
 '''
 @callback(
-  Output('income-tbl', 'data'),
-  Input('income-add', 'n_clicks'),
-  State('income-load', 'data'),
-  State('income-tbl-data', 'data'),
-  State('income-tbl', 'columns')
+  Output('income-tbl', 'page_size'),
+  Output('income-size', 'value'),
+  Input('income-page', 'n_clicks'),
+  State('income-size', 'value'),
+  State('sett-size-store', 'data')
 )
-def add_row(add, initial, data, col):
-  if ctx.triggered_id == 'income-add' and add > 0:
-    data.append({c['id']: '' for c in col})
-    return data
+def update_page_size(n_clicks, value, store):
+  if n_clicks == 0 and store == None:
+    return get_size(), get_size()
+  elif n_clicks == 0:
+    return store, store
   else:
-    return initial
-
-'''Keeps track of table data'''
-@callback(
-  Output('income-tbl-data', 'data'),
-  Input('income-tbl', 'data')
-)
-def data_tracker(data):
-  return data
+    return value, value
 
 '''
 Updates dropdown.
@@ -140,24 +146,31 @@ def tbl_dropdown(dropdown, inc, exp, loan, pay):
     }
 
 '''
-Updates page size. When initally loading the app or page,
-will take default page size from sql.
-If by button, will take from value.
+Adds additional row when clicked.
+Also, when initally loaded, corrects date formatting
+and sorts by date.
 '''
 @callback(
-  Output('income-tbl', 'page_size'),
-  Output('income-size', 'value'),
-  Input('income-page', 'n_clicks'),
-  State('income-size', 'value'),
-  State('sett-size-store', 'data')
+  Output('income-tbl', 'data'),
+  Input('income-add', 'n_clicks'),
+  State('income-trigger', 'data'),
+  State('income-tbl-data', 'data'),
+  State('income-tbl', 'columns')
 )
-def update_page_size(n_clicks, value, store):
-  if n_clicks == 0 and store == None:
-    return get_size(), get_size()
-  elif n_clicks == 0:
-    return store, store
+def add_row(add, initial, data, col):
+  if ctx.triggered_id == 'income-add' and add > 0:
+    data.append({c['id']: '' for c in col})
+    return data
   else:
-    return value, value
+    return inititalize_data(initial)
+
+'''Keeps track of table data'''
+@callback(
+  Output('income-tbl-data', 'data'),
+  Input('income-tbl', 'data')
+)
+def data_tracker(data):
+  return data
 
 '''
 Save file. If file exists, creates backups
