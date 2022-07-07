@@ -4,10 +4,10 @@ and also handles multiple page navigation.
 '''
 
 import dash_bootstrap_components as dbc
-from dash import Dash, dcc, html, Input, Output, callback
+from dash import Dash, dcc, html, Input, Output, State, callback
 import income
 import settings
-from layouts import home_layout, settings_layout, expense_layout, income_layout, MAIN_COL
+import layouts
 
 '''Navigation bar layout'''
 navbar = dbc.NavbarSimple(
@@ -21,7 +21,7 @@ navbar = dbc.NavbarSimple(
   ),
   brand='Finance',
   brand_href='/home',
-  color=MAIN_COL,  # color of navBar
+  color=layouts.MAIN_COL,  # color of navBar
   dark=True
 )
 
@@ -29,8 +29,13 @@ navbar = dbc.NavbarSimple(
 app_layout = html.Div([
   navbar,
   dcc.Location(id='url', refresh=False),
-  dcc.Store(id='income-tbl-data', storage_type='session'),  # remmeber dcc store bug
-  dcc.Store(id='income-page-size', storage_type='session'),  # remmeber dcc store bug
+  dcc.Store(id='income-tbl-data', storage_type='memory'),  # remmeber dcc store bug
+  dcc.Store(id='income-load'),
+  dcc.Store(id='sett-size-store', data=settings.get_size()), # possible it doesnt get updated in time
+  dcc.Store(id='sett-inc-store'),
+  dcc.Store(id='sett-exp-store'),
+  dcc.Store(id='sett-loan-store'),
+  dcc.Store(id='sett-pay-store'),
   html.Div(id='page-content')
 ])
 
@@ -38,17 +43,21 @@ app_layout = html.Div([
 @callback(
   Output('page-content', 'children'),
   Output('url', 'pathname'),
-  Input('url', 'pathname')
+  Input('url', 'pathname'),
+  State('income-load', 'data')
 )
-def display_page(pathname):
+def display_page(pathname, income):
   if pathname == '/income':
-    return income_layout, '/income'
+    if income == None:
+      return layouts.income_layout, '/income'
+    else:
+      return layouts.income_data, '/income'
   elif pathname == '/expense':
-    return expense_layout, '/expense'
+    return layouts.expense_layout, '/expense'
   elif pathname == '/settings':
-    return settings_layout, '/settings'
+    return layouts.settings_layout, '/settings'
   else:
-    return home_layout, '/home'
+    return layouts.home_layout, '/home'
 
 '''Initalizes dash application, uses LUX theme and supresses callback'''
 if __name__ == '__main__':
@@ -59,5 +68,9 @@ if __name__ == '__main__':
 
   settings.sett_init()
   income.income_init()
-
-  app.run_server(debug=True, use_reloader=True)  # temp not disabled hot fix on, okay to use hot fix w/ ':memory:' 
+  
+  # run use_reloader when :memory: helps for fast debugging
+  if settings.DBLOC == ':memory:':
+    app.run_server(debug=True, use_reloader=True)
+  else:
+    app.run_server(debug=True, use_reloader=False)

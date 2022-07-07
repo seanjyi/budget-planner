@@ -13,18 +13,15 @@ from contextlib import closing
 from base64 import b64decode
 from io import StringIO
 from time import sleep
-from settings import DBLOC, get_size, get_type_income, get_type_expense, get_type_loan, get_type_pay
-from layouts import INCOME_SAVE, CONFIRM_COL
+from settings import DBLOC, get_size
+from layouts import INCOME_SAVE, CONFIRM_COL, income_data
 
 '''Global variable to show different sections'''
-income_df = pd.DataFrame(data=range(5))
-show_new = True # true to show income_new
-first_read = True # true when initializing reading
-page_first = True # true when page is first read
+income_df = pd.DataFrame()
 
 '''Initial load, checks if there is new data'''
 def income_init():
-  global show_new, income_df, tbl_exists
+  global income_df
   with closing(sqlite3.connect(DBLOC)) as connection:
     with closing(connection.cursor()) as c:
       if c.execute("SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='income')").fetchone()[0] == 0:
@@ -37,34 +34,69 @@ def income_init():
         )''')
       else:
         income_df = pd.read_sql_query('SELECT * FROM income', connection)
-        show_new = False
+  print('income page initialized')
 
-''' Income table update logic '''
+# INCOME_NEW CALLBACKS
+
+''' 
+New income page. If there is loaded data, load data.
+Else, recieves data from upload or new data button.
+'''
 @callback(
-  Output('income-new', 'hidden'),
-  Output('income-data', 'hidden'),
-  Output('income-tbl', 'data'),
   Output('income-upload-error', 'hidden'),
+  Output('income-load', 'data'),
   Input('income-upload', 'contents'),
   Input('income-empty', 'n_clicks'),
+)
+def new_income(upload, empty):
+  trigger_id = ctx.triggered_id
+  if not income_df.empty:
+    return no_update, income_df.to_dict('records')
+  elif trigger_id == 'income-upload' and upload is not None:
+    upload_type, upload_string = upload.split(',')
+    if upload_type != 'data:application/vnd.ms-excel;base64':
+      return False, no_update
+    else:
+      df = pd.read_csv(StringIO(b64decode(upload_string).decode('utf-8')))
+      return no_update, df.to_dict('records')
+  elif trigger_id == 'income-empty' and empty > 0:
+    df = pd.DataFrame(data=range(5))
+    return no_update, df.to_dict('records')
+  else:
+    return no_update, no_update
+
+''' Page connection logic '''
+@callback(
+  Output('income-content', 'children'),
+  Input('income-load', 'data'),
+  prevent_initial_call=True
+)
+def income_connect(data):
+  if data != None:
+    return [income_data]
+  else:
+    return no_update
+
+# INCOME_DATA CALLBACKS
+
+'''
+Adds additional row when clicked.
+Also, when initally loaded, corrects date formatting
+and sorts by date.
+'''
+@callback(
+  Output('income-tbl', 'data'),
   Input('income-add', 'n_clicks'),
+  State('income-load', 'data'),
   State('income-tbl-data', 'data'),
   State('income-tbl', 'columns')
 )
-def data_update(upload, empty, add, data, col):
-  global tbl_exists, first_read
-  trigger_id = ctx.triggered_id
-  if trigger_id == 'income-upload' and upload is not None:
-    return load_data(upload)
-  elif trigger_id == 'income-empty' and empty > 0:
-    return init_data()
-  elif trigger_id == 'income-add' and add > 0:
-    return add_row(data, col)
-  elif first_read:
-    first_read = False
-    return not show_new, show_new, income_df.to_dict('records'), no_update
+def add_row(add, initial, data, col):
+  if ctx.triggered_id == 'income-add' and add > 0:
+    data.append({c['id']: '' for c in col})
+    return data
   else:
-    return not show_new, show_new, data, no_update
+    return initial
 
 '''Keeps track of table data'''
 @callback(
@@ -73,30 +105,6 @@ def data_update(upload, empty, add, data, col):
 )
 def data_tracker(data):
   return data
-
-# INCOME_NEW CALLBACKS
-
-'''Selected file to load'''
-def load_data(upload):
-  try:
-    upload_type, upload_string = upload.split(',')
-    if upload_type != 'data:application/vnd.ms-excel;base64':
-      raise Exception()
-
-    global show_new
-    show_new = False
-    df = pd.read_csv(StringIO(b64decode(upload_string).decode('utf-8')))
-    return not show_new, show_new, df.to_dict('records'), no_update
-  except Exception:
-    return no_update, no_update, no_update, False
-
-'''Selected new data'''
-def init_data():
-  global show_new
-  show_new = False
-  return not show_new, show_new, income_df.to_dict('records'), no_update
-
-# INCOME_DATA CALLBACKS
 
 '''
 Updates dropdown.
@@ -108,58 +116,48 @@ Type of income and payment is necessary.
 @callback(
   Output('income-tbl-error', 'hidden'),
   Output('income-tbl', 'dropdown'),
-  Input('income-tbl', 'dropdown')
+  Input('income-tbl', 'dropdown'),
+  State('sett-inc-store', 'data'),
+  State('sett-exp-store', 'data'),
+  State('sett-loan-store', 'data'),
+  State('sett-pay-store', 'data')
 )
-def tbl_dropdown(dropdown):
-  if get_type_income().empty or get_type_pay().empty:
+def tbl_dropdown(dropdown, inc, exp, loan, pay):
+  if not inc or not pay:
     return False, no_update
   else:
     return True, {
       'category': {
-        'options': ([{'label': i, 'value': i} for i in get_type_income()['type']]) if get_type_loan().empty
-        else ([{'label': i, 'value': i} for i in get_type_income()['type']] + [{'label': i, 'value': i} for i in get_type_loan()['type']])
+        'options': ([{'label': i.get('type'), 'value': i.get('type')} for i in inc]) if loan == None
+        else ([{'label': i.get('type'), 'value': i.get('type')} for i in inc] + [{'label': i.get('type'), 'value': i.get('type')} for i in loan])
       },
       'mop': {
-        'options': [{'label': i, 'value': i} for i in get_type_pay()['type']]
+        'options': [{'label': i.get('type'), 'value': i.get('type')} for i in pay]
       },
       'repay': {
-        'options': ([{'label': i, 'value': i} for i in get_type_expense()]) if get_type_loan().empty
-        else ([{'label': i, 'value': i} for i in get_type_expense()['type']])
+        'options': ([{'label': i.get('type'), 'value': i.get('type')} for i in exp])
       }
     }
 
 '''
-Updates page size. When initally loading the app,
+Updates page size. When initally loading the app or page,
 will take default page size from sql.
-If reloading, will take from dcc.Store.
 If by button, will take from value.
 '''
 @callback(
   Output('income-tbl', 'page_size'),
   Output('income-size', 'value'),
-  Output('income-page-size', 'data'),
   Input('income-page', 'n_clicks'),
   State('income-size', 'value'),
-  State('income-page-size', 'data')
+  State('sett-size-store', 'data')
 )
-def update_page_size(n_clicks, value, data):
-  global page_first
-  if n_clicks == 0 and page_first:
-    page_first = False
-    return get_size(), get_size(), get_size()
-  elif n_clicks == 0 and not page_first:
-    return data, data, data
+def update_page_size(n_clicks, value, store):
+  if n_clicks == 0 and store == None:
+    return get_size(), get_size()
+  elif n_clicks == 0:
+    return store, store
   else:
-    return value, value, value
-
-'''
-Adds additional row when clicked.
-Also, when initally loaded, corrects date formatting
-and sorts by date.
-'''
-def add_row(data, columns):
-  data.append({c['id']: '' for c in columns})
-  return no_update, no_update, data, no_update
+    return value, value
 
 '''
 Save file. If file exists, creates backups

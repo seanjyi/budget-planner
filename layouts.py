@@ -58,8 +58,7 @@ income_new = html.Div(
     'display': 'flex', 'flex-direction': 'column', 'align-items': 'center',
     'position': 'absolute', 'top': '50%', 'left': '50%',
     'transform': 'translate(-50%, -50%)'
-  },
-  hidden=True
+  }
 )
 
 income_page_size = dbc.InputGroup(
@@ -133,12 +132,11 @@ income_data = html.Div(
       style={'margin-top': '50px'},
       justify='evenly'
     ),
-  ],
-  hidden=True
+  ]
 ) 
 
 '''income page layout'''
-income_layout = html.Div([income_new, income_data])
+income_layout = html.Div(id='income-content', children=[income_new])
 
 # EXPENSE PAGE
 

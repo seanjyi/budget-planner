@@ -23,7 +23,7 @@ DBLOC = ':memory:' # change to 'data/budget.db' or ':memory:'
 
 '''Initial load, checks for past data'''
 def sett_init():
-  global page_size, type_income
+  global page_size, type_income, type_expense, type_loan, type_pay
   with closing(sqlite3.connect(DBLOC)) as connection:
     with closing(connection.cursor()) as c:
       # checks page size
@@ -47,63 +47,50 @@ def sett_init():
         type TEXT NOT NULL
         )''')
       else:
-        type_income = pd.read_sql_query('SELECT * FROM type_expense', connection)
+        type_expense = pd.read_sql_query('SELECT * FROM type_expense', connection)
       # checks type of loan
       if c.execute("SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='type_loan')").fetchone()[0] == 0:
         c.execute('''CREATE TABLE type_loan (
         type TEXT NOT NULL
         )''')
       else:
-        type_income = pd.read_sql_query('SELECT * FROM type_loan', connection)
+        type_loan = pd.read_sql_query('SELECT * FROM type_loan', connection)
       # checks type of pay
       if c.execute("SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='type_pay')").fetchone()[0] == 0:
         c.execute('''CREATE TABLE type_pay (
         type TEXT NOT NULL
         )''')
       else:
-        type_income = pd.read_sql_query('SELECT * FROM type_pay', connection)
-
-'''Returns page size'''
-def get_size():
-  return page_size
-
-'''Returns type of income'''
-def get_type_income():
-  return type_income
-
-'''Returns type of expense'''
-def get_type_expense():
-  return type_expense
-
-'''Returns type of loans'''
-def get_type_loan():
-  return type_loan
-
-'''Returns type of payment'''
-def get_type_pay():
-  return type_pay
+        type_pay = pd.read_sql_query('SELECT * FROM type_pay', connection)
+  print('settings page initialized')
 
 '''Helper function for sorting'''
 def sortByValue(list):
   return list['type']
 
+'''Returns page size'''
+def get_size():
+  return page_size
+
 '''
 Sets initial page size to 10.
-If defualt value is saved, loads that value.
+If default value is saved, loads that value.
 '''
 @callback(
   Output('sett-size', 'value'),
-  Input('sett-size', 'value')
+  Output('sett-size-store', 'data'),
+  Input('sett-size', 'value'),
+  State('sett-size-store', 'data')
 )
-def default_size(value):
-  global page_size
-  if ctx.triggered_id == None:
-    return page_size
+def default_size(value, store):
+  if value == None and store == None:
+    return page_size, page_size
+  elif value == None:
+    return store, store
   else:
-    page_size = value
     with closing(sqlite3.connect(DBLOC)) as connection:
-      pd.DataFrame(data={'size': [page_size]}).to_sql('page_size', con=connection, if_exists='replace', index=False)
-    return value
+      pd.DataFrame(data={'size': [value]}).to_sql('page_size', con=connection, if_exists='replace', index=False)
+    return value, value
 
 '''
 Loads previous dropdown income values.
@@ -112,24 +99,26 @@ Ignores null or empty values.
 '''
 @callback(
   Output('sett-inc-tbl', 'data'),
+  Output('sett-inc-store', 'data'),
   Input('sett-inc-button', 'n_clicks'),
   State('sett-inc-tbl', 'data'),
-  State('sett-inc-input', 'value')
+  State('sett-inc-input', 'value'),
+  State('sett-inc-store', 'data')
 )
-def sett_inc_add(n_clicks, data, value):
-  global type_income
-  if data == None:
-    return type_income.to_dict('records')
+def sett_inc_add(n_clicks, data, value, store):
+  if data == None and store == None:
+    return type_income.to_dict('records'), type_income.to_dict('records')
+  elif data == None:
+    return store, store
   elif value == None or value == '':
-    return no_update
+    return no_update, no_update
   else: 
     data.append({'type': value})
     data.sort(key=sortByValue)
     with closing(sqlite3.connect(DBLOC)) as connection:
       pd.DataFrame(data).to_sql('type_income', con=connection, if_exists='replace', index=False)
 
-    type_income = pd.DataFrame(data=data)
-    return data
+    return data, data
 
 '''
 Loads previous dropdown expense values.
@@ -138,25 +127,26 @@ Ignores null or empty values.
 '''
 @callback(
   Output('sett-exp-tbl', 'data'),
+  Output('sett-exp-store', 'data'),
   Input('sett-exp-button', 'n_clicks'),
   State('sett-exp-tbl', 'data'),
-  State('sett-exp-input', 'value')
+  State('sett-exp-input', 'value'),
+  State('sett-exp-store', 'data')
 )
-def sett_exp_add(n_clicks, data, value):
-  global type_expense
-  if data == None:
-    return type_expense.to_dict('records')
+def sett_inc_add(n_clicks, data, value, store):
+  if data == None and store == None:
+    return type_expense.to_dict('records'), type_expense.to_dict('records')
+  elif data == None:
+    return store, store
   elif value == None or value == '':
-    return no_update
+    return no_update, no_update
   else: 
     data.append({'type': value})
     data.sort(key=sortByValue)
     with closing(sqlite3.connect(DBLOC)) as connection:
       pd.DataFrame(data).to_sql('type_expense', con=connection, if_exists='replace', index=False)
 
-    type_expense = pd.DataFrame(data=data)
-    return data
-
+    return data, data
 
 '''
 Loads previous dropdown loan values.
@@ -165,25 +155,26 @@ Ignores null or empty values.
 '''
 @callback(
   Output('sett-loan-tbl', 'data'),
+  Output('sett-loan-store', 'data'),
   Input('sett-loan-button', 'n_clicks'),
   State('sett-loan-tbl', 'data'),
-  State('sett-loan-input', 'value')
+  State('sett-loan-input', 'value'),
+  State('sett-loan-store', 'data')
 )
-def sett_loan_add(n_clicks, data, value):
-  global type_loan
-  if data == None:
-    return type_loan.to_dict('records')
+def sett_inc_add(n_clicks, data, value, store):
+  if data == None and store == None:
+    return type_loan.to_dict('records'), type_loan.to_dict('records')
+  elif data == None:
+    return store, store
   elif value == None or value == '':
-    return no_update
+    return no_update, no_update
   else: 
     data.append({'type': value})
     data.sort(key=sortByValue)
     with closing(sqlite3.connect(DBLOC)) as connection:
       pd.DataFrame(data).to_sql('type_loan', con=connection, if_exists='replace', index=False)
 
-    type_loan = pd.DataFrame(data=data)
-    return data
-
+    return data, data
 
 '''
 Loads previous dropdown payment values.
@@ -192,23 +183,24 @@ Ignores null or empty values.
 '''
 @callback(
   Output('sett-pay-tbl', 'data'),
+  Output('sett-pay-store', 'data'),
   Input('sett-pay-button', 'n_clicks'),
   State('sett-pay-tbl', 'data'),
-  State('sett-pay-input', 'value')
+  State('sett-pay-input', 'value'),
+  State('sett-pay-store', 'data')
 )
-def sett_pay_add(n_clicks, data, value):
-  global type_pay
-  if data == None:
-    return type_pay.to_dict('records')
+def sett_inc_add(n_clicks, data, value, store):
+  if data == None and store == None:
+    return type_pay.to_dict('records'), type_pay.to_dict('records')
+  elif data == None:
+    return store, store
   elif value == None or value == '':
-    return no_update
+    return no_update, no_update
   else: 
-    print(value)
     data.append({'type': value})
     data.sort(key=sortByValue)
     with closing(sqlite3.connect(DBLOC)) as connection:
       pd.DataFrame(data).to_sql('type_pay', con=connection, if_exists='replace', index=False)
 
-    type_pay = pd.DataFrame(data=data)
-    return data
+    return data, data
   
