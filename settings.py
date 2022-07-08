@@ -72,6 +72,22 @@ def sortByValue(list):
 def get_size():
   return page_size
 
+'''Returns type of income'''
+def get_type_income():
+  return type_income
+
+'''Returns type of expense'''
+def get_type_expense():
+  return type_expense
+
+'''Returns type of loans'''
+def get_type_loan():
+  return type_loan
+
+'''Returns type of payment'''
+def get_type_pay():
+  return type_pay
+
 '''
 Sets initial page size to 10.
 If default value is saved, loads that value.

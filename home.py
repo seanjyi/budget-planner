@@ -29,9 +29,9 @@ navbar = dbc.NavbarSimple(
 app_layout = html.Div([
   navbar,
   dcc.Location(id='url', refresh=False),
-  dcc.Store(id='income-tbl-data', storage_type='memory'),  # remmeber dcc store bug
+  dcc.Store(id='income-tbl-data', storage_type='memory'), # remember dcc.Store storage_type difference
   dcc.Store(id='income-trigger'),
-  dcc.Store(id='sett-size-store', data=settings.get_size()), # possible it doesnt get updated in time
+  dcc.Store(id='sett-size-store'),
   dcc.Store(id='sett-inc-store'),
   dcc.Store(id='sett-exp-store'),
   dcc.Store(id='sett-loan-store'),

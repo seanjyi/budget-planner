@@ -13,7 +13,7 @@ from contextlib import closing
 from base64 import b64decode
 from io import StringIO
 from time import sleep
-from settings import DBLOC, get_size
+from settings import DBLOC, get_size, get_type_income, get_type_expense, get_type_loan, get_type_pay
 from layouts import INCOME_SAVE, CONFIRM_COL, income_data
 
 '''Global variable to show different sections'''
@@ -57,7 +57,7 @@ def new_income(upload, empty):
     if upload_type != 'data:application/vnd.ms-excel;base64':
       return False, no_update
     else:
-      return no_update, 'upload'
+      return no_update, upload_string
   elif trigger_id == 'income-empty' and empty > 0:
     return no_update, 'empty'
   else:
@@ -82,15 +82,11 @@ Initializes given data
 '''
 def inititalize_data(initial):
   if initial == 'load':
-    return income_df.to_dict('records')
-  elif initial == 'upload':
-    upload_type, upload_string = upload.split(',')
-    return pd.read_csv(StringIO(b64decode(upload_string).decode('utf-8'))).to_dict('records')
+    return income_df.to_dict('records')    
   elif initial == 'empty':
     return pd.DataFrame(data=range(5)).to_dict('records')
   else:
-    print('Income error')
-    return no_update
+    return pd.read_csv(StringIO(b64decode(initial).decode('utf-8'))).to_dict('records')
 
 '''
 Updates page size. When initally loading the app or page,
@@ -129,9 +125,21 @@ Type of income and payment is necessary.
   State('sett-pay-store', 'data')
 )
 def tbl_dropdown(dropdown, inc, exp, loan, pay):
-  if not inc or not pay:
-    return False, no_update
-  else:
+  if not get_type_income().empty and not get_type_pay().empty:
+    return True, {
+      'category': {
+        'options': ([{'label': i, 'value': i} for i in get_type_income()['type']]) if get_type_loan().empty
+        else ([{'label': i, 'value': i} for i in get_type_income()['type']] + [{'label': i, 'value': i} for i in get_type_loan()['type']])
+      },
+      'mop': {
+        'options': [{'label': i, 'value': i} for i in get_type_pay()['type']]
+      },
+      'repay': {
+        'options': ([]) if get_type_expense().empty
+        else ([{'label': i, 'value': i} for i in get_type_expense()['type']])
+      }
+    }
+  elif inc and pay:
     return True, {
       'category': {
         'options': ([{'label': i.get('type'), 'value': i.get('type')} for i in inc]) if loan == None
@@ -144,6 +152,8 @@ def tbl_dropdown(dropdown, inc, exp, loan, pay):
         'options': ([{'label': i.get('type'), 'value': i.get('type')} for i in exp])
       }
     }
+  else:
+    return False, no_update
 
 '''
 Adds additional row when clicked.
@@ -158,8 +168,10 @@ and sorts by date.
   State('income-tbl', 'columns')
 )
 def add_row(add, initial, data, col):
-  if ctx.triggered_id == 'income-add' and add > 0:
+  if add > 0:
     data.append({c['id']: '' for c in col})
+    return data
+  elif data != None:
     return data
   else:
     return inititalize_data(initial)

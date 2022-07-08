@@ -96,7 +96,7 @@ income_data = html.Div(
     dash_table.DataTable(
       id='income-tbl',
       columns=[
-        {'id': 'date', 'name': 'Date', 'type': 'datetime'}, 
+        {'id': 'date', 'name': 'Date (YYYY-MM-DD)', 'type': 'datetime'}, 
         {'id': 'category', 'name': 'Category', 'presentation': 'dropdown'},
         {'id': 'amount', 'name': 'Amount ($)', 'type': 'numeric', 'format': Format(precision=2, symbol=Symbol.yes, scheme=Scheme.fixed).group(True)}, 
         {'id': 'mop', 'name': 'MOP', 'presentation': 'dropdown'},
