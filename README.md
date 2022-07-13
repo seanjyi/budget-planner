@@ -13,7 +13,6 @@ The following project is built upon dash and dash-bootstrap-components ~~with ra
 | python                    | 3.9.12    |
 | dash                      | 2.5.1     |
 | dash-bootstrap-components | 1.1.0     |
-| dash-loading-spinners     | 1.0.0     |
 | dash-core-components      | 2.0.0     |
 | pandas                    | 1.4.2     |
 | sqlite3                   | 3.38.3    |
@@ -33,10 +32,9 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 ### Priority One List
 
 1. settings
-    1. kink out bugs & add loading state
-    1. css visual update << finish by friday
     1. data deletion and export
         1. additionally add deletion confirmation: reclick delete button
+        1. clean code with reusing functions
 1. expense
 1. home [start by 7/14]
 
@@ -45,7 +43,8 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 - persistence type and temporary storage for input and tbl data
 - css px might need to be switched to rem
 - income should sort data by date...
-- possible trigger, instead of copying of data
+- loading states
+- sql doesnt read on different connections when using memory
 
 ### helpful links
 

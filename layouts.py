@@ -24,6 +24,12 @@ def button_template(id, text, bg_color=None):
 
 INCOME_SAVE = button_template('income-save', 'Save')
 
+INCOME_EXPORT = button_template('export-income', 'Income')
+EXPENSE_EXPORT = button_template('export-expense', 'Expense')
+
+INCOME_DELETE = button_template('delete-income', 'Income')
+EXPENSE_DELETE = button_template('delete-expense', 'Expense')
+
 # HOME PAGE 
 
 '''home page layout'''
@@ -194,18 +200,18 @@ settings_layout = html.Div([
   dropdown_template('sett-exp', 'Type of Expense'),
   dropdown_template('sett-loan', 'Type of Loan'),
   dropdown_template('sett-pay', 'Payment Method'),
-  html.H3(id='export', children='Export Data', style={'margin-top': '10px', 'color': CONFIRM_COL}),
+  html.H3(id='export', children='Export to CSV file', style={'margin-top': '10px', 'color': CONFIRM_COL}),
   dbc.Row([
-      dbc.Col([button_template('export-income', 'Income')], width='auto'), 
-      dbc.Col([button_template('export-expense', 'Expense')], width='auto')
+      dbc.Col(id='export-inc-button', children=INCOME_EXPORT, width='auto'), 
+      dbc.Col(id='export-exp-button', children=EXPENSE_EXPORT, width='auto')
     ],
     style={'width': '450px'},
     justify='evenly'
   ),
-  html.H3(id='delete', children='Delete Data', style={'margin-top': '10px', 'color': ERROR_COL}),
+  html.H3(id='delete', children='Delete Dataset', style={'margin-top': '10px', 'color': ERROR_COL}),
   dbc.Row([
-      dbc.Col([button_template('delete-income', 'Income')], width='auto'), 
-      dbc.Col([button_template('delete-expense', 'Expense')], width='auto')
+      dbc.Col(id='delete-inc-button', children=INCOME_DELETE, width='auto'), 
+      dbc.Col(id='delete-exp-button', children=EXPENSE_DELETE, width='auto')
     ],
     style={'width': '450px'},
     justify='evenly'

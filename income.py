@@ -157,8 +157,6 @@ def tbl_dropdown(dropdown, inc, exp, loan, pay):
 
 '''
 Adds additional row when clicked.
-Also, when initally loaded, corrects date formatting
-and sorts by date.
 '''
 @callback(
   Output('income-tbl', 'data'),

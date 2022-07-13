@@ -10,7 +10,10 @@ from dash import Input, Output, State, callback, ctx, no_update
 from contextlib import closing
 from base64 import b64decode
 from io import StringIO
-from layouts import INCOME_SAVE, CONFIRM_COL
+from time import sleep
+from os.path import exists
+from os import rename, remove
+from layouts import INCOME_SAVE, CONFIRM_COL, ERROR_COL, INCOME_EXPORT, EXPENSE_EXPORT, INCOME_DELETE, EXPENSE_DELETE
 
 '''Global variable to check previous data'''
 page_size = 10
@@ -19,7 +22,7 @@ type_expense = pd.DataFrame()
 type_loan = pd.DataFrame()
 type_pay = pd.DataFrame()
 
-DBLOC = ':memory:' # change to 'data/budget.db' or ':memory:'
+DBLOC = 'data/budget.db' # change to 'data/budget.db' or ':memory:'
 
 '''Initial load, checks for past data'''
 def sett_init():
@@ -231,4 +234,145 @@ def sett_pay_add(n_clicks, data, value, store):
       pd.DataFrame(data).to_sql('type_pay', con=connection, if_exists='replace', index=False)
 
     return None, data, data
-  
+
+# EXPORT BUTTONS
+
+'''
+Save income dataset as a CSV file.
+Creates backups if original exists.
+'''
+@callback(
+  Output('export-income', 'children'),
+  Output('export-income', 'style'),
+  Output('export-inc-button', 'key'),
+  Input('export-income', 'n_clicks'),
+  State('income-tbl-data', 'data'),
+  prevent_initial_call=True
+)
+def export_income(n_clicks, data):
+  if exists('data/income.csv'):
+    i = 1
+    while(i < 6 and exists('data/income-backup-{}.csv'.format(i))):
+      i+= 1
+    for j in range(i,1,-1):
+      if j == 6:
+        remove('data/income-backup-{}.csv'.format(j-1))
+      else:
+        rename('data/income-backup-{}.csv'.format(j-1), 'data/income-backup-{}.csv'.format(j))
+    rename('data/income.csv', 'data/income-backup-1.csv')
+  pd.DataFrame(data=data).to_csv('data/income.csv', index=False)
+  return 'Saved!', {'borderRadius': '25px', 'width':'125px', 'background-color': CONFIRM_COL}, 'load_trigger'
+
+'''
+Loading time for income save button.
+Visual to show save completed.
+'''
+@callback(
+  Output('export-inc-button', 'children'),
+  Input('export-inc-button', 'key'),
+  prevent_initial_call=True
+)
+def export_income_load(key):
+  sleep(2)
+  return INCOME_EXPORT
+
+'''
+Save expense dataset as a CSV file.
+Creates backups if original exists.
+'''
+@callback(
+  Output('export-expense', 'children'),
+  Output('export-expense', 'style'),
+  Output('export-exp-button', 'key'),
+  Input('export-expense', 'n_clicks'),
+  State('income-tbl-data', 'data'), # CHANGE!!!!
+  prevent_initial_call=True
+)
+def export_expense(n_clicks, data):
+  return 'Saved!', {'borderRadius': '25px', 'width':'125px', 'background-color': CONFIRM_COL}, 'load_trigger'
+
+'''
+Loading time for expense save button.
+Visual to show save completed.
+'''
+@callback(
+  Output('export-exp-button', 'children'),
+  Input('export-exp-button', 'key'),
+  prevent_initial_call=True
+)
+def export_expense_load(key):
+  sleep(2)
+  return EXPENSE_EXPORT
+
+# DELETE BUTTONS
+
+'''
+Delete income dataset.
+Asks for a reconfirmation click  # possible to just delete from SQL and then it will give an empty frame.
+'''
+@callback(
+  Output('delete-income', 'children'),
+  Output('delete-income', 'style'),
+  Output('delete-inc-button', 'key'),
+  Output('income-trigger', 'clear_data'),
+  Output('income-tbl-data', 'clear_data'),
+  Input('delete-income', 'n_clicks'),
+  prevent_initial_call=True
+)
+def delete_income(n_clicks):
+  if n_clicks > 0:
+    if n_clicks == 1:
+      return 'Reclick', {'borderRadius': '25px', 'width':'125px', 'background-color': ERROR_COL}, no_update, no_update, no_update
+    else:  
+      with closing(sqlite3.connect(DBLOC)) as connection:
+        with closing(connection.cursor()) as c:
+          c.execute('DELETE from income')
+          connection.commit()
+          print('Deleted', c.rowcount, 'entries from income.')
+      return 'Deleted!', {'borderRadius': '25px', 'width':'125px', 'background-color': ERROR_COL}, 'load_trigger', True, True
+  else:
+    return no_update, no_update, no_update, no_update, no_update
+
+'''
+Loading time for income delete button.
+Visual to show delete completed.
+'''
+@callback(
+  Output('delete-inc-button', 'children'),
+  Input('delete-inc-button', 'key'),
+  prevent_initial_call=True
+)
+def delete_income_load(key):
+  sleep(2)
+  return INCOME_DELETE
+
+'''
+Delete expense dataset.
+Asks for a reconfirmation click
+'''
+@callback(
+  Output('delete-expense', 'children'),
+  Output('delete-expense', 'style'),
+  Output('delete-exp-button', 'key'),
+  Input('delete-expense', 'n_clicks'),
+  State('delete-expense', 'children'),
+  prevent_initial_call=True
+)
+def delete_expense(n_clicks, child):
+  if child == 'Expense':
+    return 'Reclick', {'borderRadius': '25px', 'width':'125px', 'background-color': ERROR_COL}, no_update
+  else:
+    return 'Deleted!', {'borderRadius': '25px', 'width':'125px', 'background-color': ERROR_COL}, 'load_trigger'
+
+'''
+Loading time for expense delete button.
+Visual to show delete completed.
+'''
+@callback(
+  Output('delete-exp-button', 'children'),
+  Input('delete-exp-button', 'key'),
+  prevent_initial_call=True
+)
+def delete_expense_load(key):
+  sleep(2)
+  return EXPENSE_DELETE
