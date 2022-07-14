@@ -13,16 +13,12 @@ from contextlib import closing
 from base64 import b64decode
 from io import StringIO
 from time import sleep
-from settings import DBLOC, get_size, get_type_income, get_type_expense, get_type_loan, get_type_pay
+import settings
 from layouts import INCOME_SAVE, CONFIRM_COL, income_data
-
-'''Global variable to show different sections'''
-income_df = pd.DataFrame()
 
 '''Initial load, checks if there is new data'''
 def income_init():
-  global income_df
-  with closing(sqlite3.connect(DBLOC)) as connection:
+  with closing(sqlite3.connect(settings.DBLOC)) as connection:
     with closing(connection.cursor()) as c:
       if c.execute("SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='income')").fetchone()[0] == 0:
         c.execute('''CREATE TABLE income (
@@ -33,7 +29,7 @@ def income_init():
         notes
         )''')
       else:
-        income_df = pd.read_sql_query('SELECT * FROM income', connection)
+        settings.set_value(pd.read_sql_query('SELECT * FROM income', connection), 'income')
   print('income page initialized')
 
 # INCOME_NEW CALLBACKS
@@ -50,7 +46,7 @@ Else, recieves data from upload or new data button.
 )
 def new_income(upload, empty):
   trigger_id = ctx.triggered_id
-  if not income_df.empty:
+  if not settings.get_income().empty:
     return no_update, 'load'
   elif trigger_id == 'income-upload' and upload is not None:
     upload_type, upload_string = upload.split(',')
@@ -82,7 +78,7 @@ Initializes given data
 '''
 def inititalize_data(initial):
   if initial == 'load':
-    return income_df.to_dict('records')    
+    return settings.get_income().to_dict('records')    
   elif initial == 'empty':
     return pd.DataFrame(data=range(5)).to_dict('records')
   else:
@@ -102,7 +98,7 @@ If by button, will take from value.
 )
 def update_page_size(n_clicks, value, store):
   if n_clicks == 0 and store == None:
-    return get_size(), get_size()
+    return settings.get_size(), settings.get_size()
   elif n_clicks == 0:
     return store, store
   else:
@@ -125,18 +121,18 @@ Type of income and payment is necessary.
   State('sett-pay-store', 'data')
 )
 def tbl_dropdown(dropdown, inc, exp, loan, pay):
-  if not get_type_income().empty and not get_type_pay().empty:
+  if not settings.get_type_income().empty and not settings.get_type_pay().empty:
     return True, {
       'category': {
-        'options': ([{'label': i, 'value': i} for i in get_type_income()['type']]) if get_type_loan().empty
-        else ([{'label': i, 'value': i} for i in get_type_income()['type']] + [{'label': i, 'value': i} for i in get_type_loan()['type']])
+        'options': ([{'label': i, 'value': i} for i in settings.get_type_income()['type']]) if settings.get_type_loan().empty
+        else ([{'label': i, 'value': i} for i in settings.get_type_income()['type']] + [{'label': i, 'value': i} for i in settings.get_type_loan()['type']])
       },
       'mop': {
-        'options': [{'label': i, 'value': i} for i in get_type_pay()['type']]
+        'options': [{'label': i, 'value': i} for i in settings.get_type_pay()['type']]
       },
       'repay': {
-        'options': ([]) if get_type_expense().empty
-        else ([{'label': i, 'value': i} for i in get_type_expense()['type']])
+        'options': ([]) if settings.get_type_expense().empty
+        else ([{'label': i, 'value': i} for i in settings.get_type_expense()['type']])
       }
     }
   elif inc and pay:
@@ -195,7 +191,7 @@ Additionally, updates the dataframe when saved.
   prevent_initial_call=True
 )
 def save_file(n_clicks, data):
-  with closing(sqlite3.connect(DBLOC)) as connection:
+  with closing(sqlite3.connect(settings.DBLOC)) as connection:
     pd.DataFrame(data).to_sql('income', con=connection, if_exists='replace', index=False)
     # print(pd.read_sql_query('SELECT * FROM income', connection))
   return 'Saved!', {'borderRadius': '25px', 'width':'125px', 'background-color': CONFIRM_COL}, 'load_trigger'

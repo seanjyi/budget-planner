@@ -15,14 +15,24 @@ from os.path import exists
 from os import rename, remove
 from layouts import INCOME_SAVE, CONFIRM_COL, ERROR_COL, INCOME_EXPORT, EXPENSE_EXPORT, INCOME_DELETE, EXPENSE_DELETE
 
-'''Global variable to check previous data'''
+'''Global variable for page size'''
 page_size = 10
-type_income = pd.DataFrame()
-type_expense = pd.DataFrame()
-type_loan = pd.DataFrame()
-type_pay = pd.DataFrame()
+income_df = pd.DataFrame()
+expense_df = pd.DataFrame()
 
+'''Constants for program'''
 DBLOC = 'data/budget.db' # change to 'data/budget.db' or ':memory:'
+SLEEP_TIME = 2 # two seconds to sleep
+
+'''Helper function to check type'''
+def sett_type(connection, c, type_name):
+  if c.execute(f"SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='{type_name}')").fetchone()[0] == 0:
+    c.execute(f'''CREATE TABLE {type_name} (
+    type TEXT NOT NULL
+    )''')
+    return pd.DataFrame()
+  else:
+    return pd.read_sql_query(f'SELECT * FROM {type_name}', connection)
 
 '''Initial load, checks for past data'''
 def sett_init():
@@ -38,38 +48,14 @@ def sett_init():
       else:
         page_size = pd.read_sql_query('SELECT * FROM page_size', connection)['size'].iloc[0]
       # checks type of income
-      if c.execute("SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='type_income')").fetchone()[0] == 0:
-        c.execute('''CREATE TABLE type_income (
-        type TEXT NOT NULL
-        )''')
-      else:
-        type_income = pd.read_sql_query('SELECT * FROM type_income', connection)
+      type_income = sett_type(connection, c, 'type_income')
       # checks type of expense
-      if c.execute("SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='type_expense')").fetchone()[0] == 0:
-        c.execute('''CREATE TABLE type_expense (
-        type TEXT NOT NULL
-        )''')
-      else:
-        type_expense = pd.read_sql_query('SELECT * FROM type_expense', connection)
+      type_expense = sett_type(connection, c, 'type_expense')
       # checks type of loan
-      if c.execute("SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='type_loan')").fetchone()[0] == 0:
-        c.execute('''CREATE TABLE type_loan (
-        type TEXT NOT NULL
-        )''')
-      else:
-        type_loan = pd.read_sql_query('SELECT * FROM type_loan', connection)
+      type_loan = sett_type(connection, c, 'type_loan')
       # checks type of pay
-      if c.execute("SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='type_pay')").fetchone()[0] == 0:
-        c.execute('''CREATE TABLE type_pay (
-        type TEXT NOT NULL
-        )''')
-      else:
-        type_pay = pd.read_sql_query('SELECT * FROM type_pay', connection)
+      type_pay = sett_type(connection, c, 'type_pay')
   print('settings page initialized')
-
-'''Helper function for sorting'''
-def sortByValue(list):
-  return list['type']
 
 '''Returns page size'''
 def get_size():
@@ -90,6 +76,78 @@ def get_type_loan():
 '''Returns type of payment'''
 def get_type_pay():
   return type_pay
+
+'''Returns income df'''
+def get_income():
+  return income_df
+
+'''Sets dataframe'''
+def set_value(value, name):
+  global income_df, expense_df
+  if name == 'income':
+    income_df = value
+  elif name == 'expense':
+    expense_df = value
+
+'''Helper function for sorting'''
+def sortByValue(list):
+  return list['type']
+
+'''Helper function for adding'''
+def sett_add(data, value, store, type_list, type_name, tbl):
+  if data == None and store == None:
+    return None, type_list.to_dict('records'), type_list.to_dict('records')
+  elif data == None:
+    return None, store, store
+  elif ctx.triggered_id == tbl:
+    if not data:
+      with closing(sqlite3.connect(DBLOC)) as connection:
+        with closing(connection.cursor()) as c:
+          c.execute(f'DELETE from {type_name}')
+          connection.commit()
+    else:
+      with closing(sqlite3.connect(DBLOC)) as connection:
+        pd.DataFrame(data).to_sql(type_name, con=connection, if_exists='replace', index=False)
+    return None, data, data
+  elif value == None or value == '':
+    return no_update, no_update, no_update
+  else: 
+    data.append({'type': value})
+    data.sort(key=sortByValue)
+    with closing(sqlite3.connect(DBLOC)) as connection:
+      pd.DataFrame(data).to_sql(type_name, con=connection, if_exists='replace', index=False)
+    return None, data, data
+
+'''Helper function for exporting'''
+def export(data, transaction):
+  if exists(f'data/{transaction}.csv'):
+    i = 1
+    while(i < 6 and exists(f'data/{transaction}-backup-{i}.csv')):
+      i+= 1
+    for j in range(i,1,-1):
+      if j == 6:
+        remove(f'data/{transaction}-backup-{j-1}.csv')
+      else:
+        rename(f'data/{transaction}-backup-{j-1}.csv', f'data/{transaction}-backup-{j}.csv')
+    rename(f'data/{transaction}.csv', f'data/{transaction}-backup-1.csv')
+  pd.DataFrame(data).to_csv(f'data/{transaction}.csv', index=False)
+  print(f'Exported to {transaction}.csv')
+  return 'Saved!', {'borderRadius': '25px', 'width':'125px', 'background-color': CONFIRM_COL}, 'load_trigger'
+
+'''Helper function for deleting'''
+def delete(n_clicks, tbl_name):
+  if n_clicks == 1:
+    return 'Reclick', {'borderRadius': '25px', 'width':'125px', 'background-color': ERROR_COL}, no_update, no_update, no_update
+  elif n_clicks > 1: 
+    with closing(sqlite3.connect(DBLOC)) as connection:
+      with closing(connection.cursor()) as c:
+        c.execute(f'DELETE from {tbl_name}')
+        connection.commit()
+    set_value(pd.DataFrame(), tbl_name)
+    print('Deleted', c.rowcount, f'entries from {tbl_name}.')
+    return 'Deleted!', {'borderRadius': '25px', 'width':'125px', 'background-color': ERROR_COL}, 'load_trigger', True, True
+  else:
+    return no_update, no_update, no_update, no_update, no_update
 
 '''
 Sets initial page size to 10.
@@ -126,21 +184,7 @@ Ignores null or empty values.
   State('sett-inc-store', 'data')
 )
 def sett_inc_add(n_clicks, data, value, store):
-  if data == None and store == None:
-    return None, type_income.to_dict('records'), type_income.to_dict('records')
-  elif data == None:
-    return None, store, store
-  elif ctx.triggered_id == 'sett-inc-tbl':
-    return None, data, data
-  elif value == None or value == '':
-    return no_update, no_update, no_update
-  else: 
-    data.append({'type': value})
-    data.sort(key=sortByValue)
-    with closing(sqlite3.connect(DBLOC)) as connection:
-      pd.DataFrame(data).to_sql('type_income', con=connection, if_exists='replace', index=False)
-
-    return None, data, data
+  return sett_add(data, value, store, type_income, 'type_income', 'sett-inc-tbl')
 
 '''
 Loads previous dropdown expense values.
@@ -157,21 +201,7 @@ Ignores null or empty values.
   State('sett-exp-store', 'data')
 )
 def sett_exp_add(n_clicks, data, value, store):
-  if data == None and store == None:
-    return None, type_expense.to_dict('records'), type_expense.to_dict('records')
-  elif data == None:
-    return None, store, store
-  elif ctx.triggered_id == 'sett-exp-tbl':
-    return None, data, data
-  elif value == None or value == '':
-    return no_update, no_update, no_update
-  else: 
-    data.append({'type': value})
-    data.sort(key=sortByValue)
-    with closing(sqlite3.connect(DBLOC)) as connection:
-      pd.DataFrame(data).to_sql('type_expense', con=connection, if_exists='replace', index=False)
-
-    return None, data, data
+  return sett_add(data, value, store, type_expense, 'type_expense', 'sett-exp-tbl')
 
 '''
 Loads previous dropdown loan values.
@@ -188,21 +218,7 @@ Ignores null or empty values.
   State('sett-loan-store', 'data')
 )
 def sett_loan_add(n_clicks, data, value, store):
-  if data == None and store == None:
-    return None, type_loan.to_dict('records'), type_loan.to_dict('records')
-  elif data == None:
-    return None, store, store
-  elif ctx.triggered_id == 'sett-loan-tbl':
-    return None, data, data
-  elif value == None or value == '':
-    return no_update, no_update, no_update
-  else: 
-    data.append({'type': value})
-    data.sort(key=sortByValue)
-    with closing(sqlite3.connect(DBLOC)) as connection:
-      pd.DataFrame(data).to_sql('type_loan', con=connection, if_exists='replace', index=False)
-
-    return None, data, data
+  return sett_add(data, value, store, type_loan, 'type_loan', 'sett-loan-tbl')
 
 '''
 Loads previous dropdown payment values.
@@ -219,21 +235,7 @@ Ignores null or empty values.
   State('sett-pay-store', 'data')
 )
 def sett_pay_add(n_clicks, data, value, store):
-  if data == None and store == None:
-    return None, type_pay.to_dict('records'), type_pay.to_dict('records')
-  elif data == None:
-    return None, store, store
-  elif ctx.triggered_id == 'sett-pay-tbl':
-    return None, data, data
-  elif value == None or value == '':
-    return no_update, no_update, no_update
-  else: 
-    data.append({'type': value})
-    data.sort(key=sortByValue)
-    with closing(sqlite3.connect(DBLOC)) as connection:
-      pd.DataFrame(data).to_sql('type_pay', con=connection, if_exists='replace', index=False)
-
-    return None, data, data
+  return sett_add(data, value, store, type_pay, 'type_pay', 'sett-pay-tbl')
 
 # EXPORT BUTTONS
 
@@ -250,18 +252,7 @@ Creates backups if original exists.
   prevent_initial_call=True
 )
 def export_income(n_clicks, data):
-  if exists('data/income.csv'):
-    i = 1
-    while(i < 6 and exists('data/income-backup-{}.csv'.format(i))):
-      i+= 1
-    for j in range(i,1,-1):
-      if j == 6:
-        remove('data/income-backup-{}.csv'.format(j-1))
-      else:
-        rename('data/income-backup-{}.csv'.format(j-1), 'data/income-backup-{}.csv'.format(j))
-    rename('data/income.csv', 'data/income-backup-1.csv')
-  pd.DataFrame(data=data).to_csv('data/income.csv', index=False)
-  return 'Saved!', {'borderRadius': '25px', 'width':'125px', 'background-color': CONFIRM_COL}, 'load_trigger'
+  return export(data, 'income')
 
 '''
 Loading time for income save button.
@@ -273,7 +264,7 @@ Visual to show save completed.
   prevent_initial_call=True
 )
 def export_income_load(key):
-  sleep(2)
+  sleep(SLEEP_TIME)
   return INCOME_EXPORT
 
 '''
@@ -289,7 +280,7 @@ Creates backups if original exists.
   prevent_initial_call=True
 )
 def export_expense(n_clicks, data):
-  return 'Saved!', {'borderRadius': '25px', 'width':'125px', 'background-color': CONFIRM_COL}, 'load_trigger'
+  return export(data, 'expense')
 
 '''
 Loading time for expense save button.
@@ -301,7 +292,7 @@ Visual to show save completed.
   prevent_initial_call=True
 )
 def export_expense_load(key):
-  sleep(2)
+  sleep(SLEEP_TIME)
   return EXPENSE_EXPORT
 
 # DELETE BUTTONS
@@ -320,18 +311,7 @@ Asks for a reconfirmation click  # possible to just delete from SQL and then it 
   prevent_initial_call=True
 )
 def delete_income(n_clicks):
-  if n_clicks > 0:
-    if n_clicks == 1:
-      return 'Reclick', {'borderRadius': '25px', 'width':'125px', 'background-color': ERROR_COL}, no_update, no_update, no_update
-    else:  
-      with closing(sqlite3.connect(DBLOC)) as connection:
-        with closing(connection.cursor()) as c:
-          c.execute('DELETE from income')
-          connection.commit()
-          print('Deleted', c.rowcount, 'entries from income.')
-      return 'Deleted!', {'borderRadius': '25px', 'width':'125px', 'background-color': ERROR_COL}, 'load_trigger', True, True
-  else:
-    return no_update, no_update, no_update, no_update, no_update
+  return delete(n_clicks, 'income')
 
 '''
 Loading time for income delete button.
@@ -343,7 +323,7 @@ Visual to show delete completed.
   prevent_initial_call=True
 )
 def delete_income_load(key):
-  sleep(2)
+  sleep(SLEEP_TIME)
   return INCOME_DELETE
 
 '''
@@ -359,10 +339,8 @@ Asks for a reconfirmation click
   prevent_initial_call=True
 )
 def delete_expense(n_clicks, child):
-  if child == 'Expense':
-    return 'Reclick', {'borderRadius': '25px', 'width':'125px', 'background-color': ERROR_COL}, no_update
-  else:
-    return 'Deleted!', {'borderRadius': '25px', 'width':'125px', 'background-color': ERROR_COL}, 'load_trigger'
+  # return delete(n_clicks, 'income') # change
+  return no_update, no_update, no_update
 
 '''
 Loading time for expense delete button.
@@ -374,5 +352,5 @@ Visual to show delete completed.
   prevent_initial_call=True
 )
 def delete_expense_load(key):
-  sleep(2)
+  sleep(SLEEP_TIME)
   return EXPENSE_DELETE

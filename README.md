@@ -31,20 +31,33 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 
 ### Priority One List
 
-1. settings
-    1. data deletion and export
-        1. additionally add deletion confirmation: reclick delete button
-        1. clean code with reusing functions
-1. expense
+1. EXPENSE implementation with code simplification
 1. home [start by 7/14]
+
+### Features to keep track/testing
+
+- navigation bar to different pages
+- printed initialization messages
+- income page loads from database if exists
+- otherwise can upload or start new data
+- error msg with non CSV file
+- income page loads with default page size every reload
+- income page can change tbl page size
+- tbl dropdown error msg when no income and pay type
+- loads properly when type is saved in database or not
+- can add a row
+- only saves when saved is pressed
+- save button has a message change: Saved!
+- loads from db otherwise can add or delete, will update dropdown
+- can export and delete
 
 ### Possibly bugs to remember
 
 - persistence type and temporary storage for input and tbl data
 - css px might need to be switched to rem
 - income should sort data by date...
-- loading states
 - sql doesnt read on different connections when using memory
+- sql should commit!!
 
 ### helpful links
 
