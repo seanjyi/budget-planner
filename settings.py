@@ -78,11 +78,14 @@ def get_type_pay():
   return type_pay
 
 '''Returns income df'''
-def get_income():
-  return income_df
+def get_transaction(name):
+  if name == 'income':
+    return income_df
+  elif name == 'expense':
+    return expense_df
 
 '''Sets dataframe'''
-def set_value(value, name):
+def set_transaction(value, name):
   global income_df, expense_df
   if name == 'income':
     income_df = value
@@ -131,7 +134,7 @@ def export(data, transaction):
         rename(f'data/{transaction}-backup-{j-1}.csv', f'data/{transaction}-backup-{j}.csv')
     rename(f'data/{transaction}.csv', f'data/{transaction}-backup-1.csv')
   pd.DataFrame(data).to_csv(f'data/{transaction}.csv', index=False)
-  print(f'Exported to {transaction}.csv')
+  print(f'exported to {transaction}.csv')
   return 'Saved!', {'borderRadius': '25px', 'width':'125px', 'background-color': CONFIRM_COL}, 'load_trigger'
 
 '''Helper function for deleting'''
@@ -143,8 +146,8 @@ def delete(n_clicks, tbl_name):
       with closing(connection.cursor()) as c:
         c.execute(f'DELETE from {tbl_name}')
         connection.commit()
-    set_value(pd.DataFrame(), tbl_name)
-    print('Deleted', c.rowcount, f'entries from {tbl_name}.')
+    set_transaction(pd.DataFrame(), tbl_name)
+    print('deleted', c.rowcount, f'entries from {tbl_name}')
     return 'Deleted!', {'borderRadius': '25px', 'width':'125px', 'background-color': ERROR_COL}, 'load_trigger', True, True
   else:
     return no_update, no_update, no_update, no_update, no_update
@@ -299,7 +302,7 @@ def export_expense_load(key):
 
 '''
 Delete income dataset.
-Asks for a reconfirmation click  # possible to just delete from SQL and then it will give an empty frame.
+Asks for a reconfirmation click
 '''
 @callback(
   Output('delete-income', 'children'),

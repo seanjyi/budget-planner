@@ -5,39 +5,21 @@ new data. Will show an editable data table when there is data.
 Can change page size, save or add an additional row.
 '''
 
-import sqlite3
-import pandas as pd
-import dash_bootstrap_components as dbc
-from dash import Input, Output, State, callback, ctx, no_update
-from contextlib import closing
-from base64 import b64decode
-from io import StringIO
+from dash import Input, Output, State, callback, no_update
 from time import sleep
 import settings
-from layouts import INCOME_SAVE, CONFIRM_COL, income_data
+import transactions
+from layouts import INCOME_SAVE
+
+trans_type = 'income'
 
 '''Initial load, checks if there is new data'''
 def income_init():
-  with closing(sqlite3.connect(settings.DBLOC)) as connection:
-    with closing(connection.cursor()) as c:
-      if c.execute("SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='income')").fetchone()[0] == 0:
-        c.execute('''CREATE TABLE income (
-        date INTEGER NOT NULL,
-        category NOT NULL,
-        amount MONEY NOT NULL,
-        mop NOT NULL,
-        notes
-        )''')
-      else:
-        settings.set_value(pd.read_sql_query('SELECT * FROM income', connection), 'income')
-  print('income page initialized')
+  transactions.init(trans_type)
 
 # INCOME_NEW CALLBACKS
 
-''' 
-New income page. If there is loaded data, load data.
-Else, recieves data from upload or new data button.
-'''
+'''New income page.'''
 @callback(
   Output('income-upload-error', 'hidden'),
   Output('income-trigger', 'data'),
@@ -45,19 +27,7 @@ Else, recieves data from upload or new data button.
   Input('income-empty', 'n_clicks'),
 )
 def new_income(upload, empty):
-  trigger_id = ctx.triggered_id
-  if not settings.get_income().empty:
-    return no_update, 'load'
-  elif trigger_id == 'income-upload' and upload is not None:
-    upload_type, upload_string = upload.split(',')
-    if upload_type != 'data:application/vnd.ms-excel;base64':
-      return False, no_update
-    else:
-      return no_update, upload_string
-  elif trigger_id == 'income-empty' and empty > 0:
-    return no_update, 'empty'
-  else:
-    return no_update, no_update
+  return transactions.new(upload, empty, trans_type)
 
 ''' Page connection logic '''
 @callback(
@@ -66,29 +36,22 @@ def new_income(upload, empty):
   prevent_initial_call=True
 )
 def income_connect(data):
-  if data != None:
-    return [income_data]
-  else:
-    return no_update
+  return transactions.connect(data, trans_type)
 
 # INCOME_DATA CALLBACKS
 
-'''
-Initializes given data
-'''
-def inititalize_data(initial):
-  if initial == 'load':
-    return settings.get_income().to_dict('records')    
-  elif initial == 'empty':
-    return pd.DataFrame(data=range(5)).to_dict('records')
-  else:
-    return pd.read_csv(StringIO(b64decode(initial).decode('utf-8'))).to_dict('records')
+'''Adds additional row'''
+@callback(
+  Output('income-tbl', 'data'),
+  Input('income-add', 'n_clicks'),
+  State('income-trigger', 'data'),
+  State('income-tbl-data', 'data'),
+  State('income-tbl', 'columns')
+)
+def income_add(add, initial, data, col):
+  return transactions.add_row(add, initial, data, col, trans_type)
 
-'''
-Updates page size. When initally loading the app or page,
-will take default page size from sql.
-If by button, will take from value.
-'''
+'''Updates income page size.'''
 @callback(
   Output('income-tbl', 'page_size'),
   Output('income-size', 'value'),
@@ -96,13 +59,8 @@ If by button, will take from value.
   State('income-size', 'value'),
   State('sett-size-store', 'data')
 )
-def update_page_size(n_clicks, value, store):
-  if n_clicks == 0 and store == None:
-    return settings.get_size(), settings.get_size()
-  elif n_clicks == 0:
-    return store, store
-  else:
-    return value, value
+def income_update_page(n_clicks, value, store):
+  return transactions.update_page_size(n_clicks, value, store)
 
 '''
 Updates dropdown.
@@ -120,7 +78,7 @@ Type of income and payment is necessary.
   State('sett-loan-store', 'data'),
   State('sett-pay-store', 'data')
 )
-def tbl_dropdown(dropdown, inc, exp, loan, pay):
+def income_dropdown(dropdown, inc, exp, loan, pay):
   if not settings.get_type_income().empty and not settings.get_type_pay().empty:
     return True, {
       'category': {
@@ -151,37 +109,15 @@ def tbl_dropdown(dropdown, inc, exp, loan, pay):
   else:
     return False, no_update
 
-'''
-Adds additional row when clicked.
-'''
-@callback(
-  Output('income-tbl', 'data'),
-  Input('income-add', 'n_clicks'),
-  State('income-trigger', 'data'),
-  State('income-tbl-data', 'data'),
-  State('income-tbl', 'columns')
-)
-def add_row(add, initial, data, col):
-  if add > 0:
-    data.append({c['id']: '' for c in col})
-    return data
-  elif data != None:
-    return data
-  else:
-    return inititalize_data(initial)
-
 '''Keeps track of table data'''
 @callback(
   Output('income-tbl-data', 'data'),
   Input('income-tbl', 'data')
 )
-def data_tracker(data):
+def income_data(data):
   return data
 
-'''
-Save file. If file exists, creates backups
-Additionally, updates the dataframe when saved.
-'''
+'''Save file.'''
 @callback(
   Output('income-save', 'children'),
   Output('income-save', 'style'),
@@ -190,11 +126,8 @@ Additionally, updates the dataframe when saved.
   State('income-tbl', 'data'),
   prevent_initial_call=True
 )
-def save_file(n_clicks, data):
-  with closing(sqlite3.connect(settings.DBLOC)) as connection:
-    pd.DataFrame(data).to_sql('income', con=connection, if_exists='replace', index=False)
-    # print(pd.read_sql_query('SELECT * FROM income', connection))
-  return 'Saved!', {'borderRadius': '25px', 'width':'125px', 'background-color': CONFIRM_COL}, 'load_trigger'
+def income_save(n_clicks, data):
+  return transactions.save_file(n_clicks, data, trans_type)  
 
 '''
 Loading time for save button. Visual 
@@ -205,6 +138,6 @@ to show that save completed.
   Input('income-button', 'key'),
   prevent_initial_call=True
 )
-def save_load(key):
-  sleep(2)
+def income_save_load(key):
+  sleep(settings.SLEEP_TIME)
   return INCOME_SAVE
