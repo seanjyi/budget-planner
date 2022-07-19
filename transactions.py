@@ -10,7 +10,7 @@ from contextlib import closing
 from base64 import b64decode
 from io import StringIO
 import settings
-from layouts import CONFIRM_COL, income_data
+from layouts import CONFIRM_COL, income_data, expense_data
 
 # INIT
 

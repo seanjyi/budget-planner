@@ -24,6 +24,7 @@ def button_template(id, text, bg_color=None):
   )
 
 INCOME_SAVE = button_template('income-save', 'Save')
+EXPENSE_SAVE = button_template('expense-save', 'Save')
 
 INCOME_EXPORT = button_template('export-income', 'Income')
 EXPENSE_EXPORT = button_template('export-expense', 'Expense')
@@ -114,20 +115,13 @@ income_data = html.Div(
         {'id': 'category', 'name': 'Category', 'presentation': 'dropdown'},
         {'id': 'amount', 'name': 'Amount ($)', 'type': 'numeric', 'format': Format(precision=2, symbol=Symbol.yes, scheme=Scheme.fixed).group(True)}, 
         {'id': 'mop', 'name': 'MOP', 'presentation': 'dropdown'},
-        {'id': 'repay', 'name': 'Repayment', 'presentation': 'dropdown'},
-        {'id': 'notes', 'name': 'Notes', 'type': 'text'}
+        {'id': 'repay', 'name': 'Repayment', 'presentation': 'dropdown'}
       ],
       style_cell={'text-align': 'center'},
-      style_cell_conditional=[{
-        'if': {'column_id': 'notes'}, 'text-align': 'left'
-      }],
       style_data={
         'height': 'auto',
         'lineHeight': '15px'
       },
-      style_data_conditional=[{
-        'if': {'column_id': 'notes'}, 'whiteSpace': 'normal'
-      }],
       editable=True,
       row_deletable=True
     ),
@@ -174,29 +168,22 @@ expense_data = html.Div(
       id='expense-tbl',
       columns=[
         {'id': 'date', 'name': 'Date (YYYY-MM-DD)', 'type': 'datetime'}, 
-        {'id': 'category', 'name': 'Category', 'presentation': 'dropdown'},
+        {'id': 'place', 'name': 'Place', 'type': 'text'},
         {'id': 'amount', 'name': 'Amount ($)', 'type': 'numeric', 'format': Format(precision=2, symbol=Symbol.yes, scheme=Scheme.fixed).group(True)}, 
         {'id': 'mop', 'name': 'MOP', 'presentation': 'dropdown'},
-        {'id': 'repay', 'name': 'Repayment', 'presentation': 'dropdown'},
-        {'id': 'notes', 'name': 'Notes', 'type': 'text'}
+        {'id': 'category', 'name': 'Category', 'presentation': 'dropdown'}
       ],
       style_cell={'text-align': 'center'},
-      style_cell_conditional=[{
-        'if': {'column_id': 'notes'}, 'text-align': 'left'
-      }],
       style_data={
         'height': 'auto',
         'lineHeight': '15px'
       },
-      style_data_conditional=[{
-        'if': {'column_id': 'notes'}, 'whiteSpace': 'normal'
-      }],
       editable=True,
       row_deletable=True
     ),
     html.Div(
       id='expense-tbl-error', 
-      children='Incomplete income & payment dropdown lists:\nGo to Settings and finish lists',
+      children='Incomplete expense & payment dropdown lists:\nGo to Settings and finish lists',
       style={'color': ERROR_COL, 'whiteSpace': 'pre-wrap', 'margin': '10px'},
       hidden=True
     ),
@@ -269,7 +256,7 @@ settings_layout = html.Div([
   dropdown_template('sett-inc', 'Type of Income'),
   dropdown_template('sett-exp', 'Type of Expense'),
   dropdown_template('sett-loan', 'Type of Loan'),
-  dropdown_template('sett-pay', 'Payment Method'),
+  dropdown_template('sett-pay', 'Method of Payment'),
   html.H3(id='export', children='Export to CSV file', style={'margin-top': '10px', 'color': CONFIRM_COL}),
   dbc.Row([
       dbc.Col(id='export-inc-button', children=INCOME_EXPORT, width='auto'), 

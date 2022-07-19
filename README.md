@@ -32,6 +32,8 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 ### Priority One List
 
 1. EXPENSE implementation with code simplification
+  - take notes out
+  - date, place, price, PMT, expense
 1. home [start by 7/14]
 
 ### Features to keep track/testing

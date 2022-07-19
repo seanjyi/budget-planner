@@ -6,6 +6,7 @@ and also handles multiple page navigation.
 import dash_bootstrap_components as dbc
 from dash import Dash, dcc, html, Input, Output, State, callback
 import income
+import expense
 import settings
 import layouts
 
@@ -31,6 +32,8 @@ app_layout = html.Div([
   dcc.Location(id='url', refresh=False),
   dcc.Store(id='income-tbl-data', storage_type='memory'), # remember dcc.Store storage_type difference
   dcc.Store(id='income-trigger'),
+  dcc.Store(id='expense-tbl-data'),
+  dcc.Store(id='expense-trigger'),
   dcc.Store(id='sett-size-store'),
   dcc.Store(id='sett-inc-store'),
   dcc.Store(id='sett-exp-store'),
@@ -44,16 +47,20 @@ app_layout = html.Div([
   Output('page-content', 'children'),
   Output('url', 'pathname'),
   Input('url', 'pathname'),
-  State('income-trigger', 'data')
+  State('income-trigger', 'data'),
+  State('expense-trigger', 'data')
 )
-def display_page(pathname, income):
+def display_page(pathname, income, expense):
   if pathname == '/income':
     if income == None:
       return layouts.income_layout, '/income'
     else:
       return layouts.income_data, '/income'
   elif pathname == '/expense':
-    return layouts.expense_layout, '/expense'
+    if expense == None:
+      return layouts.expense_layout, '/expense'
+    else:
+      return layouts.expense_data, '/expense'
   elif pathname == '/settings':
     return layouts.settings_layout, '/settings'
   else:
@@ -68,6 +75,7 @@ if __name__ == '__main__':
 
   settings.sett_init()
   income.income_init()
+  expense.expense_init()
   
   # run use_reloader when :memory: helps for fast debugging
   if settings.DBLOC == ':memory:':
