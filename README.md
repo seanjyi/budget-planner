@@ -31,10 +31,13 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 
 ### Priority One List
 
-1. EXPENSE implementation with code simplification
-  - take notes out
-  - date, place, price, PMT, expense
-1. home [start by 7/14]
+1. summary layout         [fin by 8/5]
+
+- income, expense, wealth spending
+- expense catalog
+
+1. create testing outcomes
+1. update/redo README      [fin by 8/12]
 
 ### Features to keep track/testing
 
@@ -60,6 +63,7 @@ To add a gif for the loading screen, simply add a gif to the assets foulder name
 - income should sort data by date...
 - sql doesnt read on different connections when using memory
 - sql should commit!!
+- could have added download, confirmdialogprovider, datepick range
 
 ### helpful links
 

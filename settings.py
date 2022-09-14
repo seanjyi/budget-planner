@@ -279,7 +279,7 @@ Creates backups if original exists.
   Output('export-expense', 'style'),
   Output('export-exp-button', 'key'),
   Input('export-expense', 'n_clicks'),
-  State('income-tbl-data', 'data'), # CHANGE!!!!
+  State('expense-tbl-data', 'data'),
   prevent_initial_call=True
 )
 def export_expense(n_clicks, data):
@@ -342,8 +342,7 @@ Asks for a reconfirmation click
   prevent_initial_call=True
 )
 def delete_expense(n_clicks, child):
-  # return delete(n_clicks, 'income') # change
-  return no_update, no_update, no_update
+  return delete(n_clicks, 'expense')
 
 '''
 Loading time for expense delete button.
